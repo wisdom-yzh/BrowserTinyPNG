@@ -58,11 +58,12 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	const zlib = __webpack_require__(/*! browserify-zlib/src */ 2);
+	const Chunk = __webpack_require__(/*! ./Chunk */ 42);
 	
 	/**
 	 * 
 	 */
-	function PNGParser() {
+	class PNGParser {
 		
 	}
 	
@@ -12346,6 +12347,264 @@
 	};
 	
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 42 */
+/*!**********************!*\
+  !*** ./src/Chunk.js ***!
+  \**********************/
+/***/ function(module, exports, __webpack_require__) {
+
+	const ChunkParser = __webpack_require__(/*! ./ChunkParser */ 43);
+	
+	/**
+	 * struct Chunk {
+	 *	String      chunkName;
+	 *  Uint8Array  chunkData;
+	 *  Uint32      crc
+	 * }
+	 */
+	class Chunk {
+	
+		/**
+		 * Construct a chunk structure from ArrayBuffer
+		 * @param {ArrayBuffer} buffer
+		 * @return void
+		 */
+		constructor(buffer) {
+	
+			if (!buffer) {
+				throw new Error('buffer为空');
+			}
+	
+			const dataView = new DataView(buffer);
+			const dataSize = dataView.getUint32(0);
+			const chunkName = Chunk.getChunkName(buffer);
+			const chunkData = new Uint8Array(buffer, 8, dataSize);
+			const crc = new dataView.getUint32(buffer, 8 + dataSize, 4);
+	
+			this.chunkName = chunkName;
+			this.chunkData = chunkData;
+			this.crc = crc;
+		}
+	
+		/**
+		 * Parse the chunk data by ChunkParser
+		 * @return {*}
+		 */
+		parse() {
+	
+			if (!this.chunkData || !this.chunkData.length) {
+				throw new Error('ChunkData is empty');
+			}
+			if (typeof ChunkParser[this.chunkName] == 'undefined') {
+				throw new Error(`ChunkName:${this.chunkName} is unavailable`);
+			}
+	
+			return ChunkParser[this.chunkName]();
+		}
+	
+		/**
+		 * Get ascii chunk name from buffer
+		 * @param {ArrayBuffer} buffer
+		 * @return {String}
+		 */
+		static getChunkName(buffer) {
+	
+			const chunkNameBuffer = new Uint8Array(buffer);
+			const chunkName = Array.from(chunkNameBuffer)
+				.map(value => String.fromCharCode(value))
+				.reduce((first, next) => first + next);
+	
+			if (chunkName.indexOf(Chunk.CHUNK_NAME) == -1) {
+				throw new Error(`不合法的ChunkName:${chunkName}`);
+			}
+	
+			return chunkName;
+		}
+	
+		/**
+		 * TODO: Check chunk data by crc32
+		 * @return bool
+		 */
+		static checkCrc() {
+			return true;
+		}
+	
+	}
+	
+	/**
+	 * Valid chunk name in png
+	 */
+	Chunk.VALID_CHUNK_NAME = [
+		'IHDR', 'PLTE', 'IDAT', 'IEND',
+		'tRNS', 'cHRM', 'gAMA', 'iCCP', 'sBIT', 'sRGB',
+		'iTXt', 'tEXt', 'zTXt',
+		'bKGD', 'hIST', 'pHYs', 'sPLT',
+		'tIME'
+	];
+	
+	export default Chunk;
+
+
+/***/ },
+/* 43 */
+/*!****************************!*\
+  !*** ./src/ChunkParser.js ***!
+  \****************************/
+/***/ function(module, exports) {
+
+	/**
+	 * chunk data 解析
+	 */
+	const ChunkParser = {
+	
+		/**
+		 * IHDR
+		 * @param Uint8Array buffer
+		 */
+		IHDR: (buffer) => {
+			return {
+	
+			}
+		},
+	
+		/**
+		 * PLTE
+		 * @param Uint8Array buffer
+		 * {
+		 * }
+		 */
+		PLTE: (buffer) => {
+			
+		},
+	
+		/**
+		 * IDAT
+		 * @param Uint8Array buffer
+		 * @return {
+		 *   
+		 * }
+		 */
+		IDAT: (buffer) => {
+			
+		},
+	
+		/**
+		 * IEND
+		 * @param Uint8Array buffer
+		 */
+		IEND: (buffer) => {
+			return {};
+		},
+	
+		/**
+		 * tRNS
+		 * @param Uint8Array buffer
+		 */
+		tRNS: (buffer) => {
+			
+		},
+	
+		/**
+		 * cHRM
+		 * @param Uint8Array buffer
+		 */
+		cHRM: (buffer) => {
+			
+		},
+	
+		/**
+		 * gAMA
+		 * @param Uint8Array buffer
+		 */
+		gAMA: (buffer) => {
+			
+		},
+	
+		/**
+		 * iCCP
+		 * @param Uint8Array buffer
+		 */
+		iCCP: (buffer) => {
+			
+		},
+	
+		/**
+		 * sBIT
+		 * @param Uint8Array buffer
+		 */
+		sBIT: (buffer) => {
+			
+		},
+	
+		/**
+		 * sRGB
+		 * @param Uint8Array buffer
+		 */
+		sRGB: (buffer) => {
+			
+		},
+	
+		/**
+		 * iTXt
+		 * @param Uint8Array buffer
+		 */
+		iTXt: (buffer) => {
+			
+		},
+	
+		/**
+		 * tEXt 
+		 * @param Uint8Array buffer
+		 */
+		tEXt: (buffer) => {
+			
+		},
+		
+		/**
+		 * zTXt 
+		 * @param Uint8Array buffer
+		 */
+		zTXt: (buffer) => {
+			
+		},
+	
+		/**
+		 * bKGD 
+		 * @param Uint8Array buffer
+		 */
+		bKGD: (buffer) => {
+			
+		},
+	
+		/**
+		 * hIST 
+		 * @param Uint8Array buffer
+		 */
+		hIST: (buffer) => {
+			
+		},
+	
+		/**
+		 * pHYs 
+		 * @param Uint8Array buffer
+		 */
+		pHYs: (buffer) => {
+			
+		},
+	
+		/**
+		 * sPLT 
+		 * @param Uint8Array buffer
+		 */
+		sPLT: (buffer) => {
+			
+		}
+	}
+	
+	export default ChunkParser;
+
 
 /***/ }
 /******/ ]);

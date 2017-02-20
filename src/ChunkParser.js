@@ -7,7 +7,7 @@ const ChunkParser = {
 	 * IHDR
 	 * @param Uint8Array buffer
 	 */
-	IHDR: function(buffer) {
+	IHDR: (buffer) => {
 		return {
 
 		}
@@ -19,7 +19,7 @@ const ChunkParser = {
 	 * {
 	 * }
 	 */
-	PLTE: function(buffer) {
+	PLTE: (buffer) => {
 		
 	},
 
@@ -30,7 +30,7 @@ const ChunkParser = {
 	 *   
 	 * }
 	 */
-	IDAT: function(buffer) {
+	IDAT: (buffer) => {
 		
 	},
 
@@ -38,7 +38,7 @@ const ChunkParser = {
 	 * IEND
 	 * @param Uint8Array buffer
 	 */
-	IEND: function(buffer) {
+	IEND: (buffer) => {
 		return {};
 	},
 
@@ -46,7 +46,7 @@ const ChunkParser = {
 	 * tRNS
 	 * @param Uint8Array buffer
 	 */
-	tRNS: function(buffer) {
+	tRNS: (buffer) => {
 		
 	},
 
@@ -54,7 +54,7 @@ const ChunkParser = {
 	 * cHRM
 	 * @param Uint8Array buffer
 	 */
-	cHRM: function(buffer) {
+	cHRM: (buffer) => {
 		
 	},
 
@@ -62,7 +62,7 @@ const ChunkParser = {
 	 * gAMA
 	 * @param Uint8Array buffer
 	 */
-	gAMA: function(buffer) {
+	gAMA: (buffer) => {
 		
 	},
 
@@ -70,7 +70,7 @@ const ChunkParser = {
 	 * iCCP
 	 * @param Uint8Array buffer
 	 */
-	iCCP: function(buffer) {
+	iCCP: (buffer) => {
 		
 	},
 
@@ -78,7 +78,7 @@ const ChunkParser = {
 	 * sBIT
 	 * @param Uint8Array buffer
 	 */
-	sBIT: function(buffer) {
+	sBIT: (buffer) => {
 		
 	},
 
@@ -86,7 +86,7 @@ const ChunkParser = {
 	 * sRGB
 	 * @param Uint8Array buffer
 	 */
-	sRGB: function(buffer) {
+	sRGB: (buffer) => {
 		
 	},
 
@@ -94,55 +94,55 @@ const ChunkParser = {
 	 * iTXt
 	 * @param Uint8Array buffer
 	 */
-	iTXt: function(buffer) {
+	iTXt: (buffer) => {
 		
-	}
+	},
 
 	/**
 	 * tEXt 
 	 * @param Uint8Array buffer
 	 */
-	tEXt: function(buffer) {
+	tEXt: (buffer) => {
 		
-	}
+	},
 	
 	/**
 	 * zTXt 
 	 * @param Uint8Array buffer
 	 */
-	zTXt: function(buffer) {
+	zTXt: (buffer) => {
 		
-	}
+	},
 
 	/**
 	 * bKGD 
 	 * @param Uint8Array buffer
 	 */
-	bKGD: function(buffer) {
+	bKGD: (buffer) => {
 		
-	}
+	},
 
 	/**
 	 * hIST 
 	 * @param Uint8Array buffer
 	 */
-	hIST: function(buffer) {
+	hIST: (buffer) => {
 		
-	}
+	},
 
 	/**
 	 * pHYs 
 	 * @param Uint8Array buffer
 	 */
-	pHYs: function(buffer) {
+	pHYs: (buffer) => {
 		
-	}
+	},
 
 	/**
 	 * sPLT 
 	 * @param Uint8Array buffer
 	 */
-	sPLT: function(buffer) {
+	sPLT: (buffer) => {
 		
 	}
 }
