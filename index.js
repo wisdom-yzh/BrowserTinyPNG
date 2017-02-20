@@ -1,1 +1,1 @@
-module.exports = require('./src/PNGParser');
+window.PNGParser = require('./src/PNGParser');

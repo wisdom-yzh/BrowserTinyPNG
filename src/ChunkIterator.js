@@ -20,8 +20,9 @@ class ChunkIterator {
 		const dataView = new DataView(this.buffer);
 		const byteLength = dataView.getUint32(0);
 
-		// create chunk data structure
-		const currentChunk = new Chunk(this.buffer.slice(0, byteLength + 12));	
+		// create chunk data structure 
+		// crc:4bytes, chunkSize:4bytes, chunkName: 4bytes
+		const currentChunk = new Chunk(this.buffer.slice(0, byteLength + 12));
 
 		// renew buffer offset
 		this.buffer = this.buffer.slice(byteLength);
@@ -33,4 +34,4 @@ class ChunkIterator {
 	}
 }
 
-export default ChunkIterator;
+module.exports = ChunkIterator;

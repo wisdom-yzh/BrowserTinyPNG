@@ -209,4 +209,4 @@ const ChunkParser = {
 	}
 }
 
-export default ChunkParser;
+module.exports = ChunkParser;

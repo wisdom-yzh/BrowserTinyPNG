@@ -11,7 +11,9 @@ const PNG_SIGNITURE = [137, 80, 78, 71, 13, 10, 26, 10];
  * @return {boolean}
  */
 const checkPNGSigniture = (buffer) => {
+
 	const signitureArray = new Uint8Array(buffer.slice(0, 8));
+
 	return PNG_SIGNITURE.map(
 		(value, key) => value - parseInt(signitureArray[key])
 	).filter(
@@ -25,9 +27,13 @@ const checkPNGSigniture = (buffer) => {
  * @return {Array}
  */
 const getAllChunks = (buffer) => {
+
 	const chunks = [];
 	const iterator = new ChunkIterator(buffer);
-	chunks.push();
+
+	for (let chunk of iterator) {
+		chunks.push(chunk);
+	}
 
 	return chunks;
 }
@@ -44,7 +50,7 @@ class PNGParser {
 	 * @return {PNGParser}
 	 */
 	constructor(buffer) {
-		return setBuffer(buffer);
+		return this.setBuffer(buffer);
 	}
 
 	/**
@@ -96,4 +102,4 @@ class PNGParser {
 	}
 }
 
-export default PNGParser;
+module.exports = PNGParser;

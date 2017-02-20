@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-		"make": "webpack -d"
+    "make": "./node_modules/.bin/webpack -d"
   },
-  "author": "",
+  "author": "wisdom",
   "license": "ISC",
   "dependencies": {
-    "browserify-zlib": "^0.1.4"
+    "browserify-zlib": "^0.1.4",
+    "webpack": "^2.2.1"
   }
 }

@@ -88,4 +88,4 @@ Chunk.VALID_CHUNK_NAME = [
 	'tIME'
 ];
 
-export default Chunk;
+module.exports = Chunk;
