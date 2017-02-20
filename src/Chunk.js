@@ -1,9 +1,10 @@
 const ChunkParser = require('./ChunkParser');
 
 /**
- * struct Chunk {
+ * @class Chunk 
+ * @desc struct {
  *	String      chunkName;
- *  Uint8Array  chunkData;
+ *  ArrayBuffer chunkData;
  *  Uint32      crc
  * }
  */
@@ -23,9 +24,9 @@ class Chunk {
 		const dataView = new DataView(buffer);
 		const dataSize = dataView.getUint32(0);
 		const chunkName = Chunk.getChunkName(buffer);
-		const chunkData = new Uint8Array(buffer, 8, dataSize);
+		const chunkData = buffer.slice(8, 8 + dataSize);
 		const crc = new dataView.getUint32(buffer, 8 + dataSize, 4);
-
+	
 		this.chunkName = chunkName;
 		this.chunkData = chunkData;
 		this.crc = crc;
@@ -44,7 +45,7 @@ class Chunk {
 			throw new Error(`ChunkName:${this.chunkName} is unavailable`);
 		}
 
-		return ChunkParser[this.chunkName]();
+		return ChunkParser[this.chunkName](this.chunkData);
 	}
 
 	/**

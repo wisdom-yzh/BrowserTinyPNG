@@ -1,21 +1,83 @@
 /**
- * chunk data 解析
+ * Valid image type and their color type value
+ */
+const COLOR_TYPE = {
+	 0: 'GREYSCALE',
+	 2: 'TRUECOLOR',
+	 3: 'INDEXED_COLOR',
+	 4: 'GREYSCALE_WITH_ALPHA',
+	 5: 'TRUECOLOR_WITH_ALPHA'
+};
+
+/**
+ * Allowed bit depths for different kind of image type
+ */
+const ALLOWED_BIT_DEPTHS = [
+	[1, 2, 4, 8, 16],
+	[],
+	[8, 16],
+	[1, 2, 4, 8],
+	[8, 16],
+	[8, 16]
+];
+
+/**
+ * chunk data parser
  */
 const ChunkParser = {
 
 	/**
 	 * IHDR
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
+	 * @return {
+	 *   width,
+	 *   height,
+	 *   bitDepth,
+	 *   colorType,
+	 *   compressMethod,
+	 *   interlaceMethod
+	 * }
 	 */
 	IHDR: (buffer) => {
-		return {
 
+		if (buffer.byteLength != 13) {
+			throw new Error('IHDR长度错误');
+		}
+
+		const dataView = new DataView(buffer);
+		const width = dataView.getUint32(buffer, 0);
+		const height = dataView.getUint32(buffer, 4);
+
+		const colorType = dataView.getUint8(buffer, 9);
+		const imageType = COLOR_TYPE[colorType];
+		if (typeof imageType == 'undefined') {
+			throw new Error('图片类型不可识别');
+		}
+
+		const bitDepth = dataView.getUint8(buffer, 8);
+		if (ALLOWED_BIT_DEPTHS[imageType].indexOf(bitDepth)) {
+			throw new Error('颜色深度不合法');
+		}
+
+		const compressMethod = dataView.getUint8(buffer, 10);
+		const filterMethod = dataView.getUint8(buffer, 11);
+		const interlaceMethod = dataView.getUint8(buffer, 12);
+
+		return {
+			imageType,
+			width,
+			height,
+			bitDepth,
+			colorType,
+			compressMethod,
+			filterMethod,
+			interlaceMethod
 		}
 	},
 
 	/**
 	 * PLTE
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 * {
 	 * }
 	 */
@@ -25,7 +87,7 @@ const ChunkParser = {
 
 	/**
 	 * IDAT
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 * @return {
 	 *   
 	 * }
@@ -36,7 +98,7 @@ const ChunkParser = {
 
 	/**
 	 * IEND
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	IEND: (buffer) => {
 		return {};
@@ -44,7 +106,7 @@ const ChunkParser = {
 
 	/**
 	 * tRNS
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	tRNS: (buffer) => {
 		
@@ -52,7 +114,7 @@ const ChunkParser = {
 
 	/**
 	 * cHRM
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	cHRM: (buffer) => {
 		
@@ -60,7 +122,7 @@ const ChunkParser = {
 
 	/**
 	 * gAMA
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	gAMA: (buffer) => {
 		
@@ -68,7 +130,7 @@ const ChunkParser = {
 
 	/**
 	 * iCCP
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	iCCP: (buffer) => {
 		
@@ -76,7 +138,7 @@ const ChunkParser = {
 
 	/**
 	 * sBIT
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	sBIT: (buffer) => {
 		
@@ -84,7 +146,7 @@ const ChunkParser = {
 
 	/**
 	 * sRGB
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	sRGB: (buffer) => {
 		
@@ -92,7 +154,7 @@ const ChunkParser = {
 
 	/**
 	 * iTXt
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	iTXt: (buffer) => {
 		
@@ -100,7 +162,7 @@ const ChunkParser = {
 
 	/**
 	 * tEXt 
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	tEXt: (buffer) => {
 		
@@ -108,7 +170,7 @@ const ChunkParser = {
 	
 	/**
 	 * zTXt 
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	zTXt: (buffer) => {
 		
@@ -116,7 +178,7 @@ const ChunkParser = {
 
 	/**
 	 * bKGD 
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	bKGD: (buffer) => {
 		
@@ -124,7 +186,7 @@ const ChunkParser = {
 
 	/**
 	 * hIST 
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	hIST: (buffer) => {
 		
@@ -132,7 +194,7 @@ const ChunkParser = {
 
 	/**
 	 * pHYs 
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	pHYs: (buffer) => {
 		
@@ -140,7 +202,7 @@ const ChunkParser = {
 
 	/**
 	 * sPLT 
-	 * @param Uint8Array buffer
+	 * @param {ArrayBuffer} buffer
 	 */
 	sPLT: (buffer) => {
 		

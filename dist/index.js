@@ -59,12 +59,100 @@
 
 	const zlib = __webpack_require__(/*! browserify-zlib/src */ 2);
 	const Chunk = __webpack_require__(/*! ./Chunk */ 42);
+	const ChunkIterator = __webpack_require__(/*! ./ChunkIterator */ 44);
+	
+	/** @const PNG_SIGNITURE */
+	const PNG_SIGNITURE = [137, 80, 78, 71, 13, 10, 26, 10];
 	
 	/**
-	 * 
+	 * Check PNG Signiture
+	 * @param {ArrayBuffer} buffer
+	 * @return {boolean}
+	 */
+	const checkPNGSigniture = (buffer) => {
+		const signitureArray = new Uint8Array(buffer.slice(0, 8));
+		return PNG_SIGNITURE.map(
+			(value, key) => value - parseInt(signitureArray[key])
+		).filter(
+			value => value != 0
+		).length == 0;
+	}
+	
+	/**
+	 * Get all chunks from a array buffer
+	 * @param {ArrayBuffer} buffer
+	 * @return {Array}
+	 */
+	const getAllChunks = (buffer) => {
+		const chunks = [];
+		const iterator = new ChunkIterator(buffer);
+		chunks.push();
+	
+		return chunks;
+	}
+	
+	/**
+	 * @class PNGParser
+	 * @desc parse a png image 
 	 */
 	class PNGParser {
 		
+		/**
+		 * Init with png stream
+		 * @param {ArrayBuffer} buffer PNG File Stream
+		 * @return {PNGParser}
+		 */
+		constructor(buffer) {
+			return setBuffer(buffer);
+		}
+	
+		/**
+		 * Set image buffer stream
+		 * @param {ArrayBuffer} buffer PNG File Stream
+		 * @return {PNGParser}
+		 */
+		setBuffer(buffer) {
+	
+			if (!buffer || !buffer.byteLength) {
+				throw new Error('传入buffer为空!');
+			}
+	
+			this.buffer = buffer;
+			this.parsed = false;
+			this.imageData = {};
+			return this;
+		}
+	
+		/**
+		 * Get source buffer data
+		 * @return {ArrayBuffer}
+		 */
+		getBuffer() {
+			return this.buffer;
+		}
+	
+		/**
+		 * Parse the image data
+		 * @param {*}
+		 */
+		parse() {
+	
+			if (this.parsed) {
+				return this.imageData;
+			}
+	
+			if (!checkPNGSigniture(this.buffer)) {
+				throw new Error('Check signiture fail! 不是PNG类型的文件');
+			}
+	
+			try {
+				// get all valid chunks
+				const chunks = getAllChunks(this.buffer.slice(PNG_SIGNITURE.length));
+	
+			} catch (e) {
+				console.log(e.message);
+			}
+		}
 	}
 	
 	export default PNGParser;
@@ -12358,9 +12446,10 @@
 	const ChunkParser = __webpack_require__(/*! ./ChunkParser */ 43);
 	
 	/**
-	 * struct Chunk {
+	 * @class Chunk 
+	 * @desc struct {
 	 *	String      chunkName;
-	 *  Uint8Array  chunkData;
+	 *  ArrayBuffer chunkData;
 	 *  Uint32      crc
 	 * }
 	 */
@@ -12380,9 +12469,9 @@
 			const dataView = new DataView(buffer);
 			const dataSize = dataView.getUint32(0);
 			const chunkName = Chunk.getChunkName(buffer);
-			const chunkData = new Uint8Array(buffer, 8, dataSize);
+			const chunkData = buffer.slice(8, 8 + dataSize);
 			const crc = new dataView.getUint32(buffer, 8 + dataSize, 4);
-	
+		
 			this.chunkName = chunkName;
 			this.chunkData = chunkData;
 			this.crc = crc;
@@ -12401,7 +12490,7 @@
 				throw new Error(`ChunkName:${this.chunkName} is unavailable`);
 			}
 	
-			return ChunkParser[this.chunkName]();
+			return ChunkParser[this.chunkName](this.chunkData);
 		}
 	
 		/**
@@ -12455,23 +12544,85 @@
 /***/ function(module, exports) {
 
 	/**
-	 * chunk data 解析
+	 * Valid image type and their color type value
+	 */
+	const COLOR_TYPE = {
+		 0: 'GREYSCALE',
+		 2: 'TRUECOLOR',
+		 3: 'INDEXED_COLOR',
+		 4: 'GREYSCALE_WITH_ALPHA',
+		 5: 'TRUECOLOR_WITH_ALPHA'
+	};
+	
+	/**
+	 * Allowed bit depths for different kind of image type
+	 */
+	const ALLOWED_BIT_DEPTHS = [
+		[1, 2, 4, 8, 16],
+		[],
+		[8, 16],
+		[1, 2, 4, 8],
+		[8, 16],
+		[8, 16]
+	];
+	
+	/**
+	 * chunk data parser
 	 */
 	const ChunkParser = {
 	
 		/**
 		 * IHDR
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
+		 * @return {
+		 *   width,
+		 *   height,
+		 *   bitDepth,
+		 *   colorType,
+		 *   compressMethod,
+		 *   interlaceMethod
+		 * }
 		 */
 		IHDR: (buffer) => {
-			return {
 	
+			if (buffer.byteLength != 13) {
+				throw new Error('IHDR长度错误');
+			}
+	
+			const dataView = new DataView(buffer);
+			const width = dataView.getUint32(buffer, 0);
+			const height = dataView.getUint32(buffer, 4);
+	
+			const colorType = dataView.getUint8(buffer, 9);
+			const imageType = COLOR_TYPE[colorType];
+			if (typeof imageType == 'undefined') {
+				throw new Error('图片类型不可识别');
+			}
+	
+			const bitDepth = dataView.getUint8(buffer, 8);
+			if (ALLOWED_BIT_DEPTHS[imageType].indexOf(bitDepth)) {
+				throw new Error('颜色深度不合法');
+			}
+	
+			const compressMethod = dataView.getUint8(buffer, 10);
+			const filterMethod = dataView.getUint8(buffer, 11);
+			const interlaceMethod = dataView.getUint8(buffer, 12);
+	
+			return {
+				imageType,
+				width,
+				height,
+				bitDepth,
+				colorType,
+				compressMethod,
+				filterMethod,
+				interlaceMethod
 			}
 		},
 	
 		/**
 		 * PLTE
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 * {
 		 * }
 		 */
@@ -12481,7 +12632,7 @@
 	
 		/**
 		 * IDAT
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 * @return {
 		 *   
 		 * }
@@ -12492,7 +12643,7 @@
 	
 		/**
 		 * IEND
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		IEND: (buffer) => {
 			return {};
@@ -12500,7 +12651,7 @@
 	
 		/**
 		 * tRNS
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		tRNS: (buffer) => {
 			
@@ -12508,7 +12659,7 @@
 	
 		/**
 		 * cHRM
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		cHRM: (buffer) => {
 			
@@ -12516,7 +12667,7 @@
 	
 		/**
 		 * gAMA
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		gAMA: (buffer) => {
 			
@@ -12524,7 +12675,7 @@
 	
 		/**
 		 * iCCP
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		iCCP: (buffer) => {
 			
@@ -12532,7 +12683,7 @@
 	
 		/**
 		 * sBIT
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		sBIT: (buffer) => {
 			
@@ -12540,7 +12691,7 @@
 	
 		/**
 		 * sRGB
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		sRGB: (buffer) => {
 			
@@ -12548,7 +12699,7 @@
 	
 		/**
 		 * iTXt
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		iTXt: (buffer) => {
 			
@@ -12556,7 +12707,7 @@
 	
 		/**
 		 * tEXt 
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		tEXt: (buffer) => {
 			
@@ -12564,7 +12715,7 @@
 		
 		/**
 		 * zTXt 
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		zTXt: (buffer) => {
 			
@@ -12572,7 +12723,7 @@
 	
 		/**
 		 * bKGD 
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		bKGD: (buffer) => {
 			
@@ -12580,7 +12731,7 @@
 	
 		/**
 		 * hIST 
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		hIST: (buffer) => {
 			
@@ -12588,7 +12739,7 @@
 	
 		/**
 		 * pHYs 
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		pHYs: (buffer) => {
 			
@@ -12596,7 +12747,7 @@
 	
 		/**
 		 * sPLT 
-		 * @param Uint8Array buffer
+		 * @param {ArrayBuffer} buffer
 		 */
 		sPLT: (buffer) => {
 			
@@ -12604,6 +12755,51 @@
 	}
 	
 	export default ChunkParser;
+
+
+/***/ },
+/* 44 */
+/*!******************************!*\
+  !*** ./src/ChunkIterator.js ***!
+  \******************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	const Chunk = __webpack_require__(/*! ./Chunk */ 42);
+	
+	/**
+	 * @class ChunkIterator
+	 * @desc Split all the chunks from a png buffer
+	 */
+	class ChunkIterator {
+	
+		[Symbol.iterator]() {
+			return this;
+		}
+	
+		constructor(buffer) {
+			this.buffer = buffer;
+		}
+	
+		next() {
+			
+			// get chunk data size
+			const dataView = new DataView(this.buffer);
+			const byteLength = dataView.getUint32(0);
+	
+			// create chunk data structure
+			const currentChunk = new Chunk(this.buffer.slice(0, byteLength + 12));	
+	
+			// renew buffer offset
+			this.buffer = this.buffer.slice(byteLength);
+	
+			return {
+				done: this.buffer.byteLength < 12,
+				value: currentChunk
+			};
+		}
+	}
+	
+	export default ChunkIterator;
 
 
 /***/ }
