@@ -1,0 +1,15 @@
+{
+  "name": "png_parser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+		"make": "webpack -d"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browserify-zlib": "^0.1.4"
+  }
+}
