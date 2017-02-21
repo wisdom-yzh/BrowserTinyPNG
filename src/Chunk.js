@@ -26,7 +26,7 @@ class Chunk {
 		const dataSize = dataView.getUint32(0);
 		const chunkName = Chunk.getChunkName(buffer.slice(4, 8));
 		const chunkData = buffer.slice(8, 8 + dataSize);
-		const crc = dataView.getUint32(buffer, 8 + dataSize, 4);
+		const crc = dataView.getUint32(8 + dataSize);
 	
 		this.chunkName = chunkName;
 		this.chunkData = chunkData;
@@ -79,7 +79,7 @@ class Chunk {
 			.reduce((first, next) => first + next);
 
 		if (Chunk.VALID_CHUNK_NAME.indexOf(chunkName) == -1) {
-			throw new Error(`不合法的ChunkName:${chunkName}`);
+			throw new Error(`illegal ChunkName:${chunkName}`);
 		}
 
 		return chunkName;

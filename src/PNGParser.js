@@ -1,4 +1,4 @@
-const Chunk = require('./Chunk');
+const ChunkParser = require('./ChunkParser');
 const ChunkIterator = require('./ChunkIterator');
 
 /** @const PNG_SIGNITURE */
@@ -21,27 +21,11 @@ const checkPNGSigniture = (buffer) => {
 }
 
 /**
- * Get all chunks from a array buffer
- * @param {ArrayBuffer} buffer
- * @return {Array}
- */
-const getAllChunks = (buffer) => {
-
-	const chunks = [];
-	const iterator = new ChunkIterator(buffer);
-
-	for (let chunk of iterator) {
-		chunks.push(chunk);
-	}
-
-	return chunks;
-}
-
-/**
  * @class PNGParser
+ * @see ChunkParser
  * @desc parse a png image 
  */
-class PNGParser {
+class PNGParser extends ChunkParser {
 	
 	/**
 	 * Init with png stream
@@ -49,6 +33,7 @@ class PNGParser {
 	 * @return {PNGParser}
 	 */
 	constructor(buffer) {
+		super();
 		return this.setBuffer(buffer);
 	}
 
@@ -65,7 +50,6 @@ class PNGParser {
 
 		this.buffer = buffer;
 		this.parsed = false;
-		this.imageData = {};
 		return this;
 	}
 
@@ -88,17 +72,37 @@ class PNGParser {
 		}
 
 		if (!checkPNGSigniture(this.buffer)) {
-			throw new Error('Check signiture fail! 不是PNG类型的文件');
+			throw new Error('Check signiture fail! Not a PNG');
 		}
 
 		try {
-			// get all valid chunks
-			const chunks = getAllChunks(this.buffer.slice(PNG_SIGNITURE.length));
-			return chunks;
+
+			// Get all chunks from array buffer
+			const chunkIterator = new ChunkIterator(this.buffer.slice(PNG_SIGNITURE.length));
+			const chunks = [];
+
+			// Parse chunks one by one
+			for (const chunk of chunkIterator) {
+				
+				const chunkData = this.imageData[chunk.chunkName];
+				const newChunkData = this.parseChunk(chunk);
+
+				if (typeof chunkData == 'undefined') {
+					this.imageData[chunk.chunkName] = newChunkData;
+				} else if (!Array.isArray(chunkData)) {
+					this.imageData[chunk.chunkName] = [chunkData, newChunkData];
+				} else {
+					this.imageData[chunk.chunkName].push(newChunkData);
+				}
+			}
 
 		} catch (e) {
+			this.parsed = false;
 			console.log(e.message);
 		}
+
+		this.parsed = true;
+		return this.imageData;
 	}
 }
 

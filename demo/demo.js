@@ -1,6 +1,8 @@
 (function() {
 
-	document.getElementById('file').addEventListener('change', () => {
+	const input = document.getElementById('file');
+
+	input.addEventListener('change', () => {
 
 		const fileObj = input.files[0];
 		if (!fileObj) {
