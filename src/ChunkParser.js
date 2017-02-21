@@ -1,3 +1,5 @@
+const zlib = require('browserify-zlib/src');
+
 /**
  * Valid image type and their color type value
  */
@@ -41,7 +43,7 @@ const ChunkParser = {
 	IHDR: (buffer) => {
 
 		if (buffer.byteLength != 13) {
-			throw new Error('IHDR长度错误');
+			throw new Error('IHDR length error!');
 		}
 
 		const dataView = new DataView(buffer);
@@ -51,12 +53,12 @@ const ChunkParser = {
 		const colorType = dataView.getUint8(buffer, 9);
 		const imageType = COLOR_TYPE[colorType];
 		if (typeof imageType == 'undefined') {
-			throw new Error('图片类型不可识别');
+			throw new Error('imageType illegal');
 		}
 
 		const bitDepth = dataView.getUint8(buffer, 8);
 		if (ALLOWED_BIT_DEPTHS[imageType].indexOf(bitDepth)) {
-			throw new Error('颜色深度不合法');
+			throw new Error('bit depths illegal');
 		}
 
 		const compressMethod = dataView.getUint8(buffer, 10);
@@ -78,11 +80,22 @@ const ChunkParser = {
 	/**
 	 * PLTE
 	 * @param {ArrayBuffer} buffer
-	 * {
-	 * }
+	 * @return {Array}
 	 */
 	PLTE: (buffer) => {
-		
+
+		if (buffer.byteLength % 3 != 0) {
+			throw new Error('PLTE length error!');
+		}
+
+		const arr = new Uint8Array(buffer);
+		const palette = [];
+
+		while (i != arr.length) {
+			palette.push(arr[i] << 16 + arr[i + 1] << 8 + arr[i + 2]);
+			i += 3;
+		}
+		return palette;
 	},
 
 	/**

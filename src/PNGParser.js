@@ -1,4 +1,3 @@
-const zlib = require('browserify-zlib/src');
 const Chunk = require('./Chunk');
 const ChunkIterator = require('./ChunkIterator');
 
@@ -95,6 +94,7 @@ class PNGParser {
 		try {
 			// get all valid chunks
 			const chunks = getAllChunks(this.buffer.slice(PNG_SIGNITURE.length));
+			return chunks;
 
 		} catch (e) {
 			console.log(e.message);

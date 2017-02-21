@@ -6,6 +6,7 @@ const ChunkParser = require('./ChunkParser');
  *	String      chunkName;
  *  ArrayBuffer chunkData;
  *  Uint32      crc
+ *  {*}         parsedData;
  * }
  */
 class Chunk {
@@ -23,13 +24,17 @@ class Chunk {
 
 		const dataView = new DataView(buffer);
 		const dataSize = dataView.getUint32(0);
-		const chunkName = Chunk.getChunkName(buffer);
+		const chunkName = Chunk.getChunkName(buffer.slice(4, 8));
 		const chunkData = buffer.slice(8, 8 + dataSize);
-		const crc = new dataView.getUint32(buffer, 8 + dataSize, 4);
+		const crc = dataView.getUint32(buffer, 8 + dataSize, 4);
 	
 		this.chunkName = chunkName;
 		this.chunkData = chunkData;
 		this.crc = crc;
+
+		if (!this.checkCrc()) {
+			throw new Error('crc32 fail! 数据损坏!');
+		}
 	}
 
 	/**
@@ -38,14 +43,27 @@ class Chunk {
 	 */
 	parse() {
 
-		if (!this.chunkData || !this.chunkData.length) {
-			throw new Error('ChunkData is empty');
-		}
-		if (typeof ChunkParser[this.chunkName] == 'undefined') {
-			throw new Error(`ChunkName:${this.chunkName} is unavailable`);
+		if (!this.parsedData) {
+			
+			if (!this.chunkData || !this.chunkData.length) {
+				throw new Error('ChunkData is empty');
+			}
+			if (typeof ChunkParser[this.chunkName] == 'undefined') {
+				throw new Error(`ChunkName:${this.chunkName} is unavailable`);
+			}
+
+			this.parsedData = ChunkParser[this.chunkName](this.chunkData);
 		}
 
-		return ChunkParser[this.chunkName](this.chunkData);
+		return this.parsedData;
+	}
+
+	/**
+	 * TODO: Check chunk data by crc32
+	 * @return bool
+	 */
+	checkCrc() {
+		return true;
 	}
 
 	/**
@@ -60,21 +78,12 @@ class Chunk {
 			.map(value => String.fromCharCode(value))
 			.reduce((first, next) => first + next);
 
-		if (chunkName.indexOf(Chunk.CHUNK_NAME) == -1) {
+		if (Chunk.VALID_CHUNK_NAME.indexOf(chunkName) == -1) {
 			throw new Error(`不合法的ChunkName:${chunkName}`);
 		}
 
 		return chunkName;
 	}
-
-	/**
-	 * TODO: Check chunk data by crc32
-	 * @return bool
-	 */
-	static checkCrc() {
-		return true;
-	}
-
 }
 
 /**

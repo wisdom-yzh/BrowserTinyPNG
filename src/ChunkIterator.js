@@ -16,19 +16,28 @@ class ChunkIterator {
 
 	next() {
 		
+		if (!this.buffer.byteLength) {
+			return {
+				done: true,
+				value: null
+			};
+		}
+
 		// get chunk data size
 		const dataView = new DataView(this.buffer);
-		const byteLength = dataView.getUint32(0);
+		const chunkDataLength = dataView.getUint32(0);
+
+		// crc: 4bytes, chunkSize: 4bytes, chunkName: 4bytes
+		const chunkLength = chunkDataLength + 12;
 
 		// create chunk data structure 
-		// crc:4bytes, chunkSize:4bytes, chunkName: 4bytes
-		const currentChunk = new Chunk(this.buffer.slice(0, byteLength + 12));
+		const currentChunk = new Chunk(this.buffer.slice(0, chunkLength));
 
 		// renew buffer offset
-		this.buffer = this.buffer.slice(byteLength);
+		this.buffer = this.buffer.slice(chunkLength);
 
 		return {
-			done: this.buffer.byteLength < 12,
+			done: false,
 			value: currentChunk
 		};
 	}
