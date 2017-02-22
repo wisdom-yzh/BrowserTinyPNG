@@ -11,20 +11,20 @@ const DEPENDENCES = {
 			'sBIT', 'gAMA', 'hIST', 'bKGD', 'cHRM'
 		],
 		IEND: ['IDAT', 'tIME', 'zTXt', 'tEXt', 'iTXt'],
-		tRNS: [],
-		cHRM: [],
-		gAMA: [],
-		iCCP: [],
-		sBIT: [],
-		sRGB: [],
-		iTXt: [],
-		tEXt: [],
-		zTXt: [],
-		bKGD: [],
-		hIST: [],
-		pHYs: [],
-		sPLT: [],
-		tIME: []
+		tRNS: ['PLTE'],
+		cHRM: ['IHDR'],
+		gAMA: ['IHDR'],
+		iCCP: ['IHDR'],
+		sBIT: ['IHDR'],
+		sRGB: ['IHDR'],
+		iTXt: ['IHDR'],
+		tEXt: ['IHDR'],
+		zTXt: ['IHDR'],
+		bKGD: ['PLTE'],
+		hIST: ['PLTE'],
+		pHYs: ['IHDR'],
+		sPLT: ['IHDR'],
+		tIME: ['IHDR']
 };
 
 /**
@@ -35,7 +35,7 @@ const COLOR_TYPE = {
 	 2: 'TRUECOLOR',
 	 3: 'INDEXED_COLOR',
 	 4: 'GREYSCALE_WITH_ALPHA',
-	 5: 'TRUECOLOR_WITH_ALPHA'
+	 6: 'TRUECOLOR_WITH_ALPHA'
 };
 
 /**
@@ -152,7 +152,7 @@ class ChunkParser {
 
 		if (buffer.byteLength % 3 != 0) {
 			throw new Error('PLTE length error!');
-		}
+		}	
 
 		const arr = new Uint8Array(buffer);
 		const palette = [];
