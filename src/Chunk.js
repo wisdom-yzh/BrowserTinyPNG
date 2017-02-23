@@ -1,3 +1,4 @@
+const Utils = require('./Utils');
 const ChunkParser = require('./ChunkParser');
 
 /**
@@ -6,7 +7,6 @@ const ChunkParser = require('./ChunkParser');
  *	String      chunkName;
  *  ArrayBuffer chunkData;
  *  Uint32      crc
- *  {*}         parsedData;
  * }
  */
 class Chunk {
@@ -38,27 +38,6 @@ class Chunk {
 	}
 
 	/**
-	 * Parse the chunk data by ChunkParser
-	 * @return {*}
-	 */
-	parse() {
-
-		if (!this.parsedData) {
-			
-			if (!this.chunkData || !this.chunkData.length) {
-				throw new Error('ChunkData is empty');
-			}
-			if (typeof ChunkParser[this.chunkName] == 'undefined') {
-				throw new Error(`ChunkName:${this.chunkName} is unavailable`);
-			}
-
-			this.parsedData = ChunkParser[this.chunkName](this.chunkData);
-		}
-
-		return this.parsedData;
-	}
-
-	/**
 	 * TODO: Check chunk data by crc32
 	 * @return bool
 	 */
@@ -74,10 +53,7 @@ class Chunk {
 	static getChunkName(buffer) {
 
 		const chunkNameBuffer = new Uint8Array(buffer);
-		const chunkName = Array.from(chunkNameBuffer)
-			.map(value => String.fromCharCode(value))
-			.reduce((first, next) => first + next);
-
+		const chunkName = Utils.uInt8Arr2String(chunkNameBuffer);
 		if (Chunk.VALID_CHUNK_NAME.indexOf(chunkName) == -1) {
 			throw new Error(`illegal ChunkName:${chunkName}`);
 		}

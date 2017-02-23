@@ -1,11 +1,12 @@
 const zlib = require('browserify-zlib/src');
+const Utils = require('./Utils')
 
 /**
  * define dependences for chunk parser 
  */
 const DEPENDENCES = {
 		IHDR: [],
-		PLTE: ['iCCP', 'sRGB', 'sBIT', 'gAMA', 'cHRM'],
+		PLTE: ['IHDR', 'iCCP', 'sRGB', 'sBIT', 'gAMA', 'cHRM'],
 		IDAT: [
 			'pHYs', 'sPLT', 'tRNS', 'iCCP', 'sRGB', 
 			'sBIT', 'gAMA', 'hIST', 'bKGD', 'cHRM'
@@ -139,7 +140,7 @@ class ChunkParser {
 			filterMethod,
 			interlaceMethod
 		}
-	};
+	}
 
 	/**
 	 * PLTE
@@ -157,6 +158,7 @@ class ChunkParser {
 		const arr = new Uint8Array(buffer);
 		const palette = [];
 
+		let i = 0;
 		while (i != arr.length) {
 			palette.push((arr[i] << 16) + 
 									 (arr[i + 1] << 8) + 
@@ -164,7 +166,7 @@ class ChunkParser {
 			i += 3;
 		}
 		return { palette };
-	};
+	}
 
 	/**
 	 * IDAT
@@ -176,7 +178,7 @@ class ChunkParser {
 	IDAT(buffer) {
 
 		return {};
-	};
+	}
 
 	/**
 	 * IEND
@@ -184,52 +186,186 @@ class ChunkParser {
 	 */
 	IEND(buffer) {
 		return {};
-	};
+	}
 
 	/**
 	 * tRNS
 	 * @param {ArrayBuffer} buffer
+	 * @return { 
+	 *   greySample: uint16 |
+	 *   rSample: uint16, gSample: uint16, bSample: uint16 |
+	 *   paletteAlpha: Array
+	 * }
 	 */
 	tRNS(buffer) {
-		
-		return {};
-	};
+
+		const IHDR = this.imageData.IHDR;
+		const imageType = IHDR.imageType;
+		const len = buffer.byteLength;
+		const arr = new DataView(buffer);
+
+		switch (imageType) {
+			case 'GREYSCALE':
+				if (len != 2) {
+					throw new Error(`tRNS length error [tRNS=${len},imageType=${imageType}`);
+				}
+				const greySample = arr.getUint16(0);
+				return { greySample };
+			case 'TRUECOLOR':
+				if (len != 6) {
+					throw new Error(`tRNS length error [tRNS=${len},imageType=${imageType}]`);
+				}
+				return { rSample, gSample, bSample };
+			case 'INDEXED_COLOR':
+				const PLTE = this.imageData.PLTE;
+				if (typeof PLTE == 'undefined') {
+					throw new Error(`tRNS without PLTE`);
+				}
+				const paletteLength = PLTE.palette.length;
+				if (paletteLength < len) {
+					throw new Error(`tRNS length error [tRNS=${len},paletteLength=${paletteLength}]`);
+				}
+				const paletteAlpha = new Uint8Array(buffer);
+				return { paletteAlpha };
+			default:
+				throw new Error(`tRNS not suitable for imageType:${imageType}`);
+		}
+	}
 
 	/**
 	 * cHRM
 	 * @param {ArrayBuffer} buffer
+	 * @return {
+	 *  'whitePointX',
+	 *  'whitePointY',
+	 *  'redX',
+	 *  'redY',
+	 *  'greenX',
+	 *  'greenY',
+	 *  'blueX',
+	 *  'blueY'
+	 * }
 	 */
 	cHRM(buffer) {
 		
-		return {};
-	};
+		if (buffer.byteLength != 32) {
+			throw new Error(`cHRM length error [cHRM=${buffer.byteLength}]`);
+		}
+
+		const dataView = new DataView(buffer);
+		const keys = [
+			'whitePointX',
+			'whitePointY',
+			'redX',
+			'redY',
+			'greenX',
+			'greenY',
+			'blueX',
+			'blueY'
+		]
+		const ret = {};
+		for (const index in keys) {
+			ret[keys[index]] = dataView.getUint32(index * 4);
+		}
+		return ret;
+	}
 
 	/**
 	 * gAMA
 	 * @param {ArrayBuffer} buffer
+	 * @return { imageGama: uint32 }
 	 */
 	gAMA(buffer) {
 		
-		return {};
-	};
+		if (buffer.byteLength != 4) {
+			throw new Error(`gAMA length error [gAMA=${buffer.byteLength}]`);
+		}
+		const dataView = new DataView(buffer);
+		return { imageGama : dataView.getUint32(0) };
+	}
 
 	/**
 	 * iCCP
 	 * @param {ArrayBuffer} buffer
+	 * @return {
+	 *   profileName: string
+	 *   compressMethod: uint8
+	 *   compressedProfile: string
+	 * }
 	 */
 	iCCP(buffer) {
+
+		const bufferArray = new Uint8Array(buffer);
+		const firstNullIndex = bufferArray.indexOf(0);
+		if (firstNullIndex == -1) {
+			throw new Error('iCCP profile not found!');
+		}
+
+		const profileNameArr = bufferArray.slice(0, firstNullIndex);
+		const profileName = Utils.uInt8Arr2String(profileNameArr);
+		const compressMethod = bufferArray[firstNullIndex + 1];
+		const compressedProfileArr = bufferArray.slice(firstNullIndex + 2);
+		const compressedProfile = Utils.uInt8Arr2String(compressedProfileArr);
 		
-		return {};
-	};
+		return {
+			profileName,
+			compressMethod,
+			compressedProfile
+		};
+	}
 
 	/**
 	 * sBIT
 	 * @param {ArrayBuffer} buffer
+	 * @param {*}
 	 */
 	sBIT(buffer) {
 		
-		return {};
-	};
+		const IHDR = this.imageData.IHDR;
+		const imageType = IHDR.imageType;
+		const len = buffer.byteLength;
+		const dataArr = new Uint8Array(buffer);
+		
+		switch (imageType) {
+			case 'GREYSCALE':
+				if (len != 1) {
+					throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
+				}
+				return { 
+					significantGreyscaleBits: dataArr[0] 
+				};
+			case 'TRUECOLOR':
+			case 'INDEXED_COLOR':
+				if (len != 3) {
+					throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
+				}
+				return {
+					significantRedBits: dataArr[0],
+					significantGreenBits: dataArr[1],
+					significantBlueBits: dataArr[2]
+				};
+			case 'GREYSCALE_WITH_ALPHA':
+				if (len != 2) {
+					throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
+				}
+				return {
+					significantGreyscaleBits: dataArr[0],
+					significantAlphaBits: dataArr[1]
+				};
+			case 'TRUECOLOR_WITH_ALPHA':
+				if (len != 4) {
+					throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
+				}
+				return {
+					significantRedBits: dataArr[0],
+					significantGreenBits: dataArr[1],
+					significantBlueBits: dataArr[2],
+					significantAlphaBits: dataArr[3]
+				};
+			default:
+				throw new Error(`sBit not suitable for imageType=${imageType}`);
+		}
+	}
 
 	/**
 	 * sRGB
@@ -237,8 +373,13 @@ class ChunkParser {
 	 */
 	sRGB(buffer) {
 		
-		return {};
-	};
+		if (buffer.byteLength != 1) {
+			throw new Error(`sRGB length != 1 [sRGB=${buffer.byteLength}]`);
+		}
+
+		const data = new Uint8Array(buffer);
+		return { renderingIntent: data[0] };
+	}
 
 	/**
 	 * iTXt
@@ -247,7 +388,7 @@ class ChunkParser {
 	iTXt(buffer) {
 		
 		return {};
-	};
+	}
 
 	/**
 	 * tEXt 
@@ -256,7 +397,7 @@ class ChunkParser {
 	tEXt(buffer) {
 		
 		return {};
-	};
+	}
 	
 	/**
 	 * zTXt 
