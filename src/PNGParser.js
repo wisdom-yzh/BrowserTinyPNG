@@ -95,13 +95,14 @@ class PNGParser extends ChunkParser {
 					this.imageData[chunk.chunkName].push(newChunkData);
 				}
 			}
+			this.parsed = true;
 
 		} catch (e) {
 			this.parsed = false;
 			console.log(e.message);
 		}
 
-		this.parsed = true;
+		console.log(this.imageData);
 		return this.imageData;
 	}
 }

@@ -183,6 +183,7 @@ class ChunkParser {
 	/**
 	 * IEND
 	 * @param {ArrayBuffer} buffer
+	 * @return {}
 	 */
 	IEND(buffer) {
 		return {};
@@ -306,11 +307,16 @@ class ChunkParser {
 		const compressMethod = bufferArray[firstNullIndex + 1];
 		const compressedProfileArr = bufferArray.slice(firstNullIndex + 2);
 		const compressedProfile = Utils.uInt8Arr2String(compressedProfileArr);
-		
+		const profile = Utils.uInt8Arr2String(
+			zlib.inflateSync(compressedProfile, {
+				windowBits: 15,
+			})
+		);
 		return {
 			profileName,
 			compressMethod,
-			compressedProfile
+			compressedProfile,
+			profile
 		};
 	}
 
