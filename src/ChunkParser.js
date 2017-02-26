@@ -1,5 +1,6 @@
 const zlib = require('browserify-zlib/src');
-const Utils = require('./Utils')
+const Buffer = require('buffer').Buffer;
+const Utils = require('./Utils');
 
 /**
  * define dependences for chunk parser 
@@ -8,6 +9,7 @@ const DEPENDENCES = {
 		IHDR: [],
 		PLTE: ['IHDR', 'iCCP', 'sRGB', 'sBIT', 'gAMA', 'cHRM'],
 		IDAT: [
+			'PLTE',
 			'pHYs', 'sPLT', 'tRNS', 'iCCP', 'sRGB', 
 			'sBIT', 'gAMA', 'hIST', 'bKGD', 'cHRM'
 		],
@@ -172,12 +174,13 @@ class ChunkParser {
 	 * IDAT
 	 * @param {ArrayBuffer} buffer
 	 * @return {
-	 *   
+	 *	 data: Uint8Array
 	 * }
 	 */
 	IDAT(buffer) {
-
-		return {};
+		return {
+			data: new Uint8Array(buffer) 
+		};
 	}
 
 	/**
@@ -308,8 +311,8 @@ class ChunkParser {
 		const compressedProfileArr = bufferArray.slice(firstNullIndex + 2);
 		const compressedProfile = Utils.uInt8Arr2String(compressedProfileArr);
 		const profile = Utils.uInt8Arr2String(
-			zlib.inflateSync(compressedProfile, {
-				windowBits: 15,
+			zlib.inflateSync(Buffer.from(compressedProfileArr), {
+				windowBits: 15
 			})
 		);
 		return {

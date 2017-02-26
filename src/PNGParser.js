@@ -1,5 +1,9 @@
+const Buffer = require('buffer').Buffer;
+const zlib = require('zlib');
 const ChunkParser = require('./ChunkParser');
 const ChunkIterator = require('./ChunkIterator');
+const Pixel = require('./Pixel');
+
 
 /** @const PNG_SIGNITURE */
 const PNG_SIGNITURE = [137, 80, 78, 71, 13, 10, 26, 10];
@@ -63,7 +67,7 @@ class PNGParser extends ChunkParser {
 
 	/**
 	 * Parse the image data
-	 * @param {*}
+	 * @return {*}
 	 */
 	parse() {
 
@@ -89,10 +93,12 @@ class PNGParser extends ChunkParser {
 
 				if (typeof chunkData == 'undefined') {
 					this.imageData[chunk.chunkName] = newChunkData;
-				} else if (!Array.isArray(chunkData)) {
-					this.imageData[chunk.chunkName] = [chunkData, newChunkData];
-				} else {
-					this.imageData[chunk.chunkName].push(newChunkData);
+				} else if (chunk.chunkName == 'IDAT') {
+					const oldData = this.imageData[chunk.chunkName].data;
+					const newData = new Uint8Array(
+						Array.from(oldData).concat(Array.from(newChunkData.data))
+					);
+					this.imageData[chunk.chunkName].data = newData;
 				}
 			}
 			this.parsed = true;
@@ -102,8 +108,35 @@ class PNGParser extends ChunkParser {
 			console.log(e.message);
 		}
 
-		console.log(this.imageData);
+		this.decodeImageData();
 		return this.imageData;
+	}
+
+	/**
+	 * decode image content
+	 */
+	decodeImageData() {
+		
+		let chunkSize = 0xffff, data;
+		while (true) {
+			try {
+				data = zlib.inflateSync(Buffer.from(this.imageData['IDAT'].data), {
+					chunkSize: chunkSize,
+					windowBits: 15
+				});
+				break;
+			}
+			catch (e) {
+				if (e.code == 'Z_BUF_ERROR') chunkSize <<= 1;
+				else {
+					console.log(e.message);
+				}
+			}
+		}
+
+		delete this.imageData['IDAT'].data;
+		this.imageData['IDAT'].data = data;
+		return data;
 	}
 }
 
