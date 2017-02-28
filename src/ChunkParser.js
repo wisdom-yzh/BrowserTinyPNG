@@ -1,56 +1,7 @@
 const zlib = require('browserify-zlib/src');
 const Buffer = require('buffer').Buffer;
 const Utils = require('./Utils');
-
-/**
- * define dependences for chunk parser 
- */
-const DEPENDENCES = {
-		IHDR: [],
-		PLTE: ['IHDR', 'iCCP', 'sRGB', 'sBIT', 'gAMA', 'cHRM'],
-		IDAT: [
-			'PLTE',
-			'pHYs', 'sPLT', 'tRNS', 'iCCP', 'sRGB', 
-			'sBIT', 'gAMA', 'hIST', 'bKGD', 'cHRM'
-		],
-		IEND: ['IDAT', 'tIME', 'zTXt', 'tEXt', 'iTXt'],
-		tRNS: ['PLTE'],
-		cHRM: ['IHDR'],
-		gAMA: ['IHDR'],
-		iCCP: ['IHDR'],
-		sBIT: ['IHDR'],
-		sRGB: ['IHDR'],
-		iTXt: ['IHDR'],
-		tEXt: ['IHDR'],
-		zTXt: ['IHDR'],
-		bKGD: ['PLTE'],
-		hIST: ['PLTE'],
-		pHYs: ['IHDR'],
-		sPLT: ['IHDR'],
-		tIME: ['IHDR']
-};
-
-/**
- * Valid image type and their color type value
- */
-const COLOR_TYPE = {
-	 0: 'GREYSCALE',
-	 2: 'TRUECOLOR',
-	 3: 'INDEXED_COLOR',
-	 4: 'GREYSCALE_WITH_ALPHA',
-	 6: 'TRUECOLOR_WITH_ALPHA'
-};
-
-/**
- * Allowed bit depths for different kind of image type
- */
-const ALLOWED_BIT_DEPTHS = {
-	GREYSCALE           : [1, 2, 4, 8, 16], 
-	TRUECOLOR           : [8, 16],
-	INDEXED_COLOR       : [1, 2, 4, 8],
-	GREYSCALE_WITH_ALPHA: [8, 16],
-	TRUECOLOR_WITH_ALPHA: [8, 16]
-};
+const { DEPENDENCES, COLOR_TYPE, ALLOWED_BIT_DEPTHS } = require('./Constants');
 
 /**
  * Chunk data parser

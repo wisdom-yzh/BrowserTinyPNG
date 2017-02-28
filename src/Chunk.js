@@ -1,5 +1,6 @@
 const Utils = require('./Utils');
 const ChunkParser = require('./ChunkParser');
+const { VALID_CHUNK_NAME } = require('./Constants');
 
 /**
  * @class Chunk 
@@ -54,23 +55,12 @@ class Chunk {
 
 		const chunkNameBuffer = new Uint8Array(buffer);
 		const chunkName = Utils.uInt8Arr2String(chunkNameBuffer);
-		if (Chunk.VALID_CHUNK_NAME.indexOf(chunkName) == -1) {
+		if (VALID_CHUNK_NAME.indexOf(chunkName) == -1) {
 			throw new Error(`illegal ChunkName:${chunkName}`);
 		}
 
 		return chunkName;
 	}
 }
-
-/**
- * Valid chunk name in png
- */
-Chunk.VALID_CHUNK_NAME = [
-	'IHDR', 'PLTE', 'IDAT', 'IEND',
-	'tRNS', 'cHRM', 'gAMA', 'iCCP', 'sBIT', 'sRGB',
-	'iTXt', 'tEXt', 'zTXt',
-	'bKGD', 'hIST', 'pHYs', 'sPLT',
-	'tIME'
-];
 
 module.exports = Chunk;

@@ -3,10 +3,8 @@ const zlib = require('zlib');
 const ChunkParser = require('./ChunkParser');
 const ChunkIterator = require('./ChunkIterator');
 const Pixel = require('./Pixel');
-
-
-/** @const PNG_SIGNITURE */
-const PNG_SIGNITURE = [137, 80, 78, 71, 13, 10, 26, 10];
+const DecoderFactory = require('./DecoderFactory');
+const { PNG_SIGNITURE } = require('./Constants');
 
 /**
  * Check PNG Signiture
@@ -101,6 +99,8 @@ class PNGParser extends ChunkParser {
 					this.imageData[chunk.chunkName].data = newData;
 				}
 			}
+
+			this.decompressImageData();
 			this.parsed = true;
 
 		} catch (e) {
@@ -108,7 +108,6 @@ class PNGParser extends ChunkParser {
 			console.log(e.message);
 		}
 
-		this.decompressImage();
 		return this.imageData;
 	}
 
@@ -148,6 +147,12 @@ class PNGParser extends ChunkParser {
 		const width = this.imageData['IHDR'].width;
 		const height = this.imageData['IHDR'].height;
 		const imageType = this.imageData['IHDR'].imageType;
+		const ptr = 0;
+
+		while (ptr < originData.length) {
+			originData[ptr]++;
+			ptr++;
+		}
 	}
 }
 
