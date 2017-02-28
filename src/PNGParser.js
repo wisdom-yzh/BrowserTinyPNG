@@ -108,14 +108,14 @@ class PNGParser extends ChunkParser {
 			console.log(e.message);
 		}
 
-		this.decodeImageData();
+		this.decompressImage();
 		return this.imageData;
 	}
 
 	/**
-	 * decode image content
+	 * decompress image content
 	 */
-	decodeImageData() {
+	decompressImageData() {
 		
 		let chunkSize = 0xffff, data;
 		while (true) {
@@ -137,6 +137,17 @@ class PNGParser extends ChunkParser {
 		delete this.imageData['IDAT'].data;
 		this.imageData['IDAT'].data = data;
 		return data;
+	}
+
+	/**
+	 * decode image
+	 */
+	decodeImageData() {
+
+		const originData = this.imageData['IDAT'].data;
+		const width = this.imageData['IHDR'].width;
+		const height = this.imageData['IHDR'].height;
+		const imageType = this.imageData['IHDR'].imageType;
 	}
 }
 
