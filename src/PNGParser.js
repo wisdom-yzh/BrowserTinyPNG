@@ -3,6 +3,7 @@ const zlib = require('zlib');
 const ChunkParser = require('./ChunkParser');
 const ChunkIterator = require('./ChunkIterator');
 const Pixel = require('./Pixel');
+const Image = require('./Image');
 const DecoderFactory = require('./DecoderFactory');
 const { PNG_SIGNITURE } = require('./Constants');
 
@@ -101,6 +102,7 @@ class PNGParser extends ChunkParser {
 			}
 
 			this.decompressImageData();
+			this.decodeImageData();
 			this.parsed = true;
 
 		} catch (e) {
@@ -109,6 +111,17 @@ class PNGParser extends ChunkParser {
 		}
 
 		return this.imageData;
+	}
+
+	/**
+   * get an image object
+   */
+	getImage() {
+	
+		if (!this.parsed) {
+			this.parse();
+		}
+		return new Image(this.imageData['IDAT'].data);
 	}
 
 	/**
@@ -147,12 +160,21 @@ class PNGParser extends ChunkParser {
 		const width = this.imageData['IHDR'].width;
 		const height = this.imageData['IHDR'].height;
 		const imageType = this.imageData['IHDR'].imageType;
-		const ptr = 0;
-
-		while (ptr < originData.length) {
-			originData[ptr]++;
-			ptr++;
+		
+		const external = {};
+		if (imageType == 'INDEXED_COLOR') {
+			if (this.imageData['PLTE'] && this.imageData['PLTE'].palette) {
+				external.palette = this.imageData['PLTE'].palette;
+			}
+			if (this.imageData['tRNS'] && this.imageData['tRNS'].paletteAlpha) {
+				external.paletteAlpha = this.imageData['tRNS'].paletteAlpha;
+			}
 		}
+		
+		const decoder = DecoderFactory.getDecoder(imageType, width, height, 
+																							originData, external);
+
+		this.imageData['IDAT'].data = decoder.decode();
 	}
 }
 

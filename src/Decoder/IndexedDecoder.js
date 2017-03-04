@@ -1,4 +1,5 @@
 const BaseDecoder = require('./BaseDecoder');
+const { IndexedPixel } = require('../Pixel');
 
 class IndexedDecoder extends BaseDecoder {
 
@@ -12,7 +13,8 @@ class IndexedDecoder extends BaseDecoder {
 		if (!Array.isArray(palette)) {
 			throw new Error('palette is not valid');
 		}
-		if (!Array.isArray(paletteAlpha) && typeof paletteAlpha != 'undefined') {
+		if (!paletteAlpha instanceof Uint8Array && 
+				typeof paletteAlpha != 'undefined') {
 			throw new Error('paletteAlpha is not valid');
 		}
 
@@ -20,9 +22,13 @@ class IndexedDecoder extends BaseDecoder {
 		this.palette = palette;
 	}
 
-	decode() {
-		
-		
+	/**
+   * @override
+   */
+	getPixel() {
+
+		const index = this.imageData[this.ptr];
+		return new IndexedPixel(index, this.palette, this.paletteAlpha);
 	}
 }
 

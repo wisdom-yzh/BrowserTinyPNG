@@ -25,11 +25,27 @@ class BaseDecoder {
 	}
 
 	/**
-	 * virtual function
+	 * decode function
 	 */
 	decode() {
 		
+		const decodeData = [];
+
+		this.ptr = 0;
+		while (this.ptr < this.imageData.length) {
+			decodeData.push(this.getPixel());
+			this.ptr++;
+		}
+
+		return decodeData;
 	}
+
+	/**
+	 * get pixel, virtual function
+	 */
+	getPixel() {
+
+	}	
 }
 
 module.exports = BaseDecoder;

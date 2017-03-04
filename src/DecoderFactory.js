@@ -1,10 +1,15 @@
 const { IMAGE_TYPE } = require('./Constants');
-const Decoder = require('./Decoder');
-const Pixel = require('./Pixel');
+const {
+	GreyDecoder,
+	RGBDecoder,
+	IndexedDecoder,
+	GreyAlphaDecoder,
+	RGBADecoder
+} = require('./Decoder');
 
 const DecoderFactory = {
-	getDecoder: (imageType, imageWidth, imageHeight, external) => {
-		if (validType.indexOf(imageType) == -1) {
+	getDecoder: (imageType, imageWidth, imageHeight, imageData, external) => {
+		if (IMAGE_TYPE.indexOf(imageType) == -1) {
 			throw new Error('invalid image type!');
 		}
 		const imageDecoder = {
@@ -14,7 +19,7 @@ const DecoderFactory = {
 			GREYSCALE_WITH_ALPHA: GreyAlphaDecoder,
 			TRUECOLOR_WITH_ALPHA: RGBADecoder
 		};
-		return new Decoder[imageType](imageType, imageWidth, imageHeight, external);
+		return new imageDecoder[imageType](imageWidth, imageHeight, imageData, external);
 	}
 }
 
