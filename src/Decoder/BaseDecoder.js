@@ -1,4 +1,4 @@
-const { IMAGE_TYPE } = require('../Constants');
+const { FILTER_TYPE, IMAGE_TYPE } = require('../Constants');
 
 class BaseDecoder {
 
@@ -22,6 +22,9 @@ class BaseDecoder {
     this.imageHeight = imageHeight;
     this.imageData = imageData;
     this.ptr = 0;
+
+    // 在派生类中定义rowLength,表示一个扫描行有多少个bytes
+    // this.rowLength = ?
   }
 
   /**
@@ -31,21 +34,36 @@ class BaseDecoder {
 
     const decodeData = [];
 
-    this.ptr = 0;
-    while (this.ptr < this.imageData.length) {
-      decodeData.push(this.getPixel());
-      this.ptr++;
+    let index = 0, currentRow, lastRow;
+    let filterType = this.imageData.shift();
+    for (index = 0; index < this.imageHeight; index++) {
+      currentRow = this.imageData.splice(0, this.rowLength);
+      this.row = this.reconstruct(FILTER_TYPE[filterType])(currentRow, lastRow);
+      lastRow = this.row;
+      this.ptr = 0;
+      while (this.ptr < this.rowLength) {
+        decodeData.push(this.getPixel());
+      }
+      filterType = this.imageData.shift();
     }
-
     return decodeData;
   }
 
   /**
+   * @virtual
+   * reconstruct
+   */
+  reconstruct(filterType) {
+    return (currentRow, lastRow) => currentRow;
+  }
+
+  /**
+   * @virtual
    * get pixel, virtual function
    */
   getPixel() {
 
-  }	
+  }
 }
 
 module.exports = BaseDecoder;

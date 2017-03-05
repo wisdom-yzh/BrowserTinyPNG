@@ -20,6 +20,7 @@ class IndexedDecoder extends BaseDecoder {
 
     this.paletteAlpha = paletteAlpha;
     this.palette = palette;
+    this.rowLength = this.imageWidth;
   }
 
   /**
@@ -27,7 +28,8 @@ class IndexedDecoder extends BaseDecoder {
    */
   getPixel() {
 
-    const index = this.imageData[this.ptr];
+    const index = this.row[this.ptr];
+    this.ptr++;
     return new IndexedPixel(index, this.palette, this.paletteAlpha);
   }
 }

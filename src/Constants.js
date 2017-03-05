@@ -17,7 +17,7 @@ module.exports = {
     IHDR: [],
     PLTE: ['IHDR', 'iCCP', 'sRGB', 'sBIT', 'gAMA', 'cHRM'],
     IDAT: [
-      'PLTE',
+      'PLTE', 'IHDR',
       'pHYs', 'sPLT', 'tRNS', 'iCCP', 'sRGB', 
       'sBIT', 'gAMA', 'hIST', 'bKGD', 'cHRM'
     ],
@@ -63,5 +63,13 @@ module.exports = {
     INDEXED_COLOR       : [1, 2, 4, 8],
     GREYSCALE_WITH_ALPHA: [8, 16],
     TRUECOLOR_WITH_ALPHA: [8, 16]
-  }
+  },
+
+  FILTER_TYPE: [
+    'filterNone',
+    'filterSub',
+    'filterUp',
+    'filterAverage',
+    'filterPaeth'
+  ]
 };

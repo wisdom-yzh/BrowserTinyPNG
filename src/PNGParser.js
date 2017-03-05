@@ -110,6 +110,7 @@ class PNGParser extends ChunkParser {
       console.log(e.message);
     }
 
+    console.log(this.imageData);
     return this.imageData;
   }
 
@@ -161,7 +162,7 @@ class PNGParser extends ChunkParser {
    */
   decodeImageData() {
 
-    const originData = this.imageData['IDAT'].data;
+    const originData = Array.from(this.imageData['IDAT'].data);
     const width = this.imageData['IHDR'].width;
     const height = this.imageData['IHDR'].height;
     const imageType = this.imageData['IHDR'].imageType;

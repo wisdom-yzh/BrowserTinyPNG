@@ -6,6 +6,21 @@ class Pixel {
   constructor(type) {
     this.type = type;
   }
+
+  /**
+   * @virtual
+   * @desc set pixel on canvas iamgeData
+   * @param {ImageData} canvasImageData
+   * @param {Number} index
+   */
+  setPixel(canvasImageData, index) {
+    if (!canvasImageData instanceof ImageData) {
+      throw new Error('canvasImageData is not ImageData');
+    }
+    if (canvasImageData.data.length <= index + 3) {
+      throw new Error('index overflow!');
+    }
+  }
 }
 
 Pixel.TYPE = {
@@ -29,19 +44,16 @@ class GreyPixel extends Pixel {
   }
 
   /**
-   * @virtual
-   * @desc set pixel on canvas iamgeData
-   * @param {ImageData} canvasImageData
-   * @param {Number} index
+   * @override
    */
   setPixel(canvasImageData, index) {
-    if (!canvasImageData instanceof ImageData) {
-      throw new Error('canvasImageData is not ImageData');
-    }
-    if (!canvasImageData.data.length <= index + 3) {
-      throw new Error('index overflow!');
-    }
+    super.setPixel(canvasImageData, index);
+    canvasImageData.data[index] = this.greySample;
+    canvasImageData.data[index+1] = this.greySample;
+    canvasImageData.data[index+2] = this.greySample;
+    canvasImageData.data[index+3] = 0;
   }
+
 }
 
 /**
@@ -52,7 +64,7 @@ class GreyAlphaPixel extends Pixel {
   constructor(pixel, alpha) {
     super(Pixel.TYPE.GREY_ALPHA);
     this.greySample = pixel;
-    this.alphaSample = alpha / 255.0;
+    this.alphaSample = alpha;
   }
 
   /**
@@ -74,9 +86,14 @@ class IndexedPixel extends Pixel {
 
   constructor(index, palette, paletteAlpha) {
     super(Pixel.TYPE.INDEXED);
-    this.hasAlpha = typeof paletteAlpha != 'undefined';
     const color = palette[index];
-    this.alphaSample = this.hasAlpha ? paletteAlpha[index] / 255.0 : 0;
+    this.hasAlpha = typeof paletteAlpha != 'undefined';
+    this.alphaSample = this.hasAlpha ? (paletteAlpha[index] || 255) : 255;
+    if (this.hasAlpha && index < paletteAlpha.length) {
+      this.alphaSample = paletteAlpha[index];
+    } else {
+      this.alphaSample = 255;
+    }
     this.rSample = color >> 16;
     this.gSample = (color & 0x00FF00) >> 8;
     this.bSample = color & 0x0000FF;
@@ -120,7 +137,7 @@ class RGBPixel extends Pixel {
     canvasImageData.data[index] = this.rSample;
     canvasImageData.data[index+1] = this.gSample;
     canvasImageData.data[index+2] = this.bSample;
-    canvasImageData.data[index+3] = 0;
+    canvasImageData.data[index+3] = 255;
   }
 
 }
@@ -141,7 +158,11 @@ class RGBAPixel extends Pixel {
       this.gSample = value[1];
       this.bSample = value[2];
       if (value.length == 4) {
-        this.alphaSample = value[3] / 255.0;
+        this.alphaSample = value[3];
+      } else if (alpha != undefined) {
+        this.alphaSample = alpha;
+      } else {
+        this.alphaSample = 255;
       }
     }
   }

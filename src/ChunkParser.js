@@ -287,43 +287,43 @@ class ChunkParser {
     const dataArr = new Uint8Array(buffer);
 
     switch (imageType) {
-        case 'GREYSCALE':
-            if (len != 1) {
+      case 'GREYSCALE':
+        if (len != 1) {
           throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
         }
         return { 
           significantGreyscaleBits: dataArr[0] 
         };
-    case 'TRUECOLOR':
-    case 'INDEXED_COLOR':
+      case 'TRUECOLOR':
+      case 'INDEXED_COLOR':
         if (len != 3) {
-      throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
-    }
-    return {
-      significantRedBits: dataArr[0],
-      significantGreenBits: dataArr[1],
-      significantBlueBits: dataArr[2]
-    };
-case 'GREYSCALE_WITH_ALPHA':
-    if (len != 2) {
-  throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
-}
-return {
-  significantGreyscaleBits: dataArr[0],
-  significantAlphaBits: dataArr[1]
-};
+          throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
+        }
+        return {
+          significantRedBits: dataArr[0],
+          significantGreenBits: dataArr[1],
+          significantBlueBits: dataArr[2]
+        };
+      case 'GREYSCALE_WITH_ALPHA':
+        if (len != 2) {
+          throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
+        }
+        return {
+          significantGreyscaleBits: dataArr[0],
+          significantAlphaBits: dataArr[1]
+        };
       case 'TRUECOLOR_WITH_ALPHA':
-          if (len != 4) {
-        throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
-      }
+        if (len != 4) {
+          throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
+        }
       return {
         significantRedBits: dataArr[0],
         significantGreenBits: dataArr[1],
         significantBlueBits: dataArr[2],
         significantAlphaBits: dataArr[3]
       };
-  default:
-      throw new Error(`sBit not suitable for imageType=${imageType}`);
+      default:
+        throw new Error(`sBit not suitable for imageType=${imageType}`);
     }
   }
 
