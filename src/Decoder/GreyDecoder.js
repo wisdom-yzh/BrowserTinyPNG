@@ -3,19 +3,19 @@ const { GreyPixel } = require('../Pixel');
 
 class GreyDecoder extends BaseDecoder {
 
-	constructor(imageWidth, imageHeight, imageData) {
-		super('GREYSCALE', imageWidth, imageHeight, imageData);
-	}
+  constructor(imageWidth, imageHeight, imageData) {
+    super('GREYSCALE', imageWidth, imageHeight, imageData);
+  }
 
-	/**
-   * @override
-   */
-	getPixel() {
+    /**
+  * @override
+  */
+  getPixel() {
 
-		const pixel = this.imageData[this.ptr];
-		return new GreyPixel(pixel);
-	}
-	
+    const pixel = this.imageData[this.ptr];
+    return new GreyPixel(pixel);
+  }
+
 }
 
 module.exports = GreyDecoder;

@@ -14,13 +14,13 @@ const { PNG_SIGNITURE } = require('./Constants');
  */
 const checkPNGSigniture = (buffer) => {
 
-	const signitureArray = new Uint8Array(buffer.slice(0, 8));
+  const signitureArray = new Uint8Array(buffer.slice(0, 8));
 
-	return PNG_SIGNITURE.map(
-		(value, key) => value - parseInt(signitureArray[key])
-	).filter(
-		value => value != 0
-	).length == 0;
+  return PNG_SIGNITURE.map(
+    (value, key) => value - parseInt(signitureArray[key])
+  ).filter(
+    value => value != 0
+  ).length == 0;
 }
 
 /**
@@ -29,153 +29,158 @@ const checkPNGSigniture = (buffer) => {
  * @desc parse a png image 
  */
 class PNGParser extends ChunkParser {
-	
-	/**
-	 * Init with png stream
-	 * @param {ArrayBuffer} buffer PNG File Stream
-	 * @return {PNGParser}
-	 */
-	constructor(buffer) {
-		super();
-		return this.setBuffer(buffer);
-	}
 
-	/**
-	 * Set image buffer stream
-	 * @param {ArrayBuffer} buffer PNG File Stream
-	 * @return {PNGParser}
-	 */
-	setBuffer(buffer) {
+  /**
+   * Init with png stream
+   * @param {ArrayBuffer} buffer PNG File Stream
+   * @return {PNGParser}
+   */
+  constructor(buffer) {
+    super();
+    return this.setBuffer(buffer);
+  }
 
-		if (!buffer || !buffer.byteLength) {
-			throw new Error('传入buffer为空!');
-		}
+  /**
+   * Set image buffer stream
+   * @param {ArrayBuffer} buffer PNG File Stream
+   * @return {PNGParser}
+   */
+  setBuffer(buffer) {
 
-		this.buffer = buffer;
-		this.parsed = false;
-		return this;
-	}
+    if (!buffer || !buffer.byteLength) {
+      throw new Error('传入buffer为空!');
+    }
 
-	/**
-	 * Get source buffer data
-	 * @return {ArrayBuffer}
-	 */
-	getBuffer() {
-		return this.buffer;
-	}
+    this.buffer = buffer;
+    this.parsed = false;
+    return this;
+  }
 
-	/**
-	 * Parse the image data
-	 * @return {*}
-	 */
-	parse() {
+  /**
+   * Get source buffer data
+   * @return {ArrayBuffer}
+   */
+  getBuffer() {
+    return this.buffer;
+  }
 
-		if (this.parsed) {
-			return this.imageData;
-		}
+  /**
+   * Parse the image data
+   * @return {*}
+   */
+  parse() {
 
-		if (!checkPNGSigniture(this.buffer)) {
-			throw new Error('Check signiture fail! Not a PNG');
-		}
+    if (this.parsed) {
+      return this.imageData;
+    }
 
-		try {
+    if (!checkPNGSigniture(this.buffer)) {
+      throw new Error('Check signiture fail! Not a PNG');
+    }
 
-			// Get all chunks from array buffer
-			const chunkIterator = new ChunkIterator(this.buffer.slice(PNG_SIGNITURE.length));
-			const chunks = [];
+    try {
 
-			// Parse chunks one by one
-			for (const chunk of chunkIterator) {
-				
-				const chunkData = this.imageData[chunk.chunkName];
-				const newChunkData = this.parseChunk(chunk);
+      // Get all chunks from array buffer
+      const chunkIterator = new ChunkIterator(this.buffer.slice(PNG_SIGNITURE.length));
+      const chunks = [];
 
-				if (typeof chunkData == 'undefined') {
-					this.imageData[chunk.chunkName] = newChunkData;
-				} else if (chunk.chunkName == 'IDAT') {
-					const oldData = this.imageData[chunk.chunkName].data;
-					const newData = new Uint8Array(
-						Array.from(oldData).concat(Array.from(newChunkData.data))
-					);
-					this.imageData[chunk.chunkName].data = newData;
-				}
-			}
+      // Parse chunks one by one
+      for (const chunk of chunkIterator) {
 
-			this.decompressImageData();
-			this.decodeImageData();
-			this.parsed = true;
+        const chunkData = this.imageData[chunk.chunkName];
+        const newChunkData = this.parseChunk(chunk);
 
-		} catch (e) {
-			this.parsed = false;
-			console.log(e.message);
-		}
+        if (typeof chunkData == 'undefined') {
+          this.imageData[chunk.chunkName] = newChunkData;
+        } else if (chunk.chunkName == 'IDAT') {
+          const oldData = this.imageData[chunk.chunkName].data;
+          const newData = new Uint8Array(
+            Array.from(oldData).concat(Array.from(newChunkData.data))
+          );
+          this.imageData[chunk.chunkName].data = newData;
+        }
+      }
 
-		return this.imageData;
-	}
+      this.decompressImageData();
+      this.decodeImageData();
+      this.parsed = true;
 
-	/**
+    } catch (e) {
+      this.parsed = false;
+      console.log(e.message);
+    }
+
+    return this.imageData;
+  }
+
+  /**
    * get an image object
    */
-	getImage() {
-	
-		if (!this.parsed) {
-			this.parse();
-		}
-		return new Image(this.imageData['IDAT'].data);
-	}
+  getImage() {
 
-	/**
-	 * decompress image content
-	 */
-	decompressImageData() {
-		
-		let chunkSize = 0xffff, data;
-		while (true) {
-			try {
-				data = zlib.inflateSync(Buffer.from(this.imageData['IDAT'].data), {
-					chunkSize: chunkSize,
-					windowBits: 15
-				});
-				break;
-			}
-			catch (e) {
-				if (e.code == 'Z_BUF_ERROR') chunkSize <<= 1;
-				else {
-					console.log(e.message);
-				}
-			}
-		}
+    if (!this.parsed) {
+      this.parse();
+    }
 
-		delete this.imageData['IDAT'].data;
-		this.imageData['IDAT'].data = data;
-		return data;
-	}
+    return new Image(
+      this.imageData['IDAT'].data,
+      this.imageData['IHDR'].width,
+      this.imageData['IHDR'].height
+    );
+  }
 
-	/**
-	 * decode image
-	 */
-	decodeImageData() {
+  /**
+   * decompress image content
+   */
+  decompressImageData() {
 
-		const originData = this.imageData['IDAT'].data;
-		const width = this.imageData['IHDR'].width;
-		const height = this.imageData['IHDR'].height;
-		const imageType = this.imageData['IHDR'].imageType;
-		
-		const external = {};
-		if (imageType == 'INDEXED_COLOR') {
-			if (this.imageData['PLTE'] && this.imageData['PLTE'].palette) {
-				external.palette = this.imageData['PLTE'].palette;
-			}
-			if (this.imageData['tRNS'] && this.imageData['tRNS'].paletteAlpha) {
-				external.paletteAlpha = this.imageData['tRNS'].paletteAlpha;
-			}
-		}
-		
-		const decoder = DecoderFactory.getDecoder(imageType, width, height, 
-																							originData, external);
+    let chunkSize = 0xffff, data;
+    while (true) {
+      try {
+        data = zlib.inflateSync(Buffer.from(this.imageData['IDAT'].data), {
+          chunkSize: chunkSize,
+          windowBits: 15
+        });
+        break;
+      }
+      catch (e) {
+        if (e.code == 'Z_BUF_ERROR') chunkSize <<= 1;
+        else {
+          console.log(e.message);
+        }
+      }
+    }
 
-		this.imageData['IDAT'].data = decoder.decode();
-	}
+    delete this.imageData['IDAT'].data;
+    this.imageData['IDAT'].data = data;
+    return data;
+  }
+
+  /**
+   * decode image
+   */
+  decodeImageData() {
+
+    const originData = this.imageData['IDAT'].data;
+    const width = this.imageData['IHDR'].width;
+    const height = this.imageData['IHDR'].height;
+    const imageType = this.imageData['IHDR'].imageType;
+
+    const external = {};
+    if (imageType == 'INDEXED_COLOR') {
+      if (this.imageData['PLTE'] && this.imageData['PLTE'].palette) {
+        external.palette = this.imageData['PLTE'].palette;
+      }
+      if (this.imageData['tRNS'] && this.imageData['tRNS'].paletteAlpha) {
+        external.paletteAlpha = this.imageData['tRNS'].paletteAlpha;
+      }
+    }
+
+    const decoder = DecoderFactory.getDecoder(imageType, width, height, 
+                                              originData, external);
+
+    this.imageData['IDAT'].data = decoder.decode();
+  }
 }
 
 module.exports = PNGParser;

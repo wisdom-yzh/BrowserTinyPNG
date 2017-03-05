@@ -1,25 +1,27 @@
 (function() {
 
-	const input = document.getElementById('file');
+  const input = document.getElementById('file');
+  const canvas = document.getElementById('png_canvas');
 
-	input.addEventListener('change', () => {
+  input.addEventListener('change', () => {
 
-		const fileObj = input.files[0];
-		if (!fileObj) {
-			return false;
-		}
+    const fileObj = input.files[0];
+    if (!fileObj) {
+      return false;
+    }
 
-		const fileReader = new FileReader();
+    const fileReader = new FileReader();
 
-		fileReader.onload = (event) => {
-			const buffer = event.target.result;
-			const parser = new PNGParser(buffer);
-			console.log(parser.parse());
-		};
+    fileReader.onload = (event) => {
+      const buffer = event.target.result;
+      const parser = new PNGParser(buffer);
+      const image = parser.getImage();
+      image.draw(canvas);
+    };
 
-		fileReader.readAsArrayBuffer(fileObj);
+    fileReader.readAsArrayBuffer(fileObj);
 
-	}, false);
+  }, false);
 
 })();
 

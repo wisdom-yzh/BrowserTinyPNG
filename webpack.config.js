@@ -1,14 +1,14 @@
 module.exports = {
-	
-	entry: {
-		index: './index.js'
-	},
 
-	output: {
-		filename: '[name].js',
-		path: `${__dirname}/dist`
-	},
+  entry: {
+    index: './index.js'
+  },
 
-	module: {
-	}
+  output: {
+    filename: '[name].js',
+    path: `${__dirname}/dist`
+  },
+
+  module: {
+  }
 };
