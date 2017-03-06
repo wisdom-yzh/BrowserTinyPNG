@@ -15,6 +15,8 @@ class Image {
     this.imageData = scanLine;
     this.height = height;
     this.width = width;
+
+    this.deltaY = 0;
   }
 
   /**
@@ -42,6 +44,34 @@ class Image {
       index += 4;
     }
     this.ctx.putImageData(canvasImageData, 0, 0);
+  }
+
+  /**
+   * draw a scanline
+   * @param {Element} dom
+   * @param {Array} scanline
+   * @return void
+   */
+  drawScanLine(dom, scanLine) {
+    
+    if (scanLine.length != this.width) {
+      throw new Error('scanline width invalid');
+    }
+    this.imageData = scanLine;
+    if (!this.ctx) {
+      this.initCanvas(dom);
+    }
+    const canvasScanLine = this.ctx.createImageData(this.width, 1);
+
+    let index = 0, originIndex = 0;
+    while (index < canvasScanLine.data.length) {
+      this.imageData[originIndex++].setPixel(canvasImageData, index);
+      index += 4;
+    }
+    this.ctx.putImageData(canvasScanLine, 0, this.deltaY++);
+    if (this.deltaY == this.height) {
+      this.deltaY = 0;
+    }
   }
 
   /**
