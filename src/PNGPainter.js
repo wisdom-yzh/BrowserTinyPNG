@@ -6,7 +6,7 @@ const {
   RGBAPixel
 } = require('./Pixel');
 
-class Image {
+class PNGPainter {
 
   /**
    * init image
@@ -65,7 +65,7 @@ class Image {
 
     let index = 0, originIndex = 0;
     while (index < canvasScanLine.data.length) {
-      this.imageData[originIndex++].setPixel(canvasImageData, index);
+      this.imageData[originIndex++].setPixel(canvasScanLine, index);
       index += 4;
     }
     this.ctx.putImageData(canvasScanLine, 0, this.deltaY++);
@@ -88,4 +88,4 @@ class Image {
   }
 }
 
-module.exports = Image;
+module.exports = PNGPainter;

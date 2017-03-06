@@ -3,7 +3,7 @@ const zlib = require('zlib');
 const ChunkParser = require('./ChunkParser');
 const ChunkIterator = require('./ChunkIterator');
 const Pixel = require('./Pixel');
-const Image = require('./Image');
+const PNGPainter = require('./PNGPainter');
 const DecoderFactory = require('./DecoderFactory');
 const { PNG_SIGNITURE } = require('./Constants');
 
@@ -117,13 +117,13 @@ class PNGParser extends ChunkParser {
   /**
    * get an image object
    */
-  getImage() {
+  getPainter() {
 
     if (!this.parsed) {
       this.parse();
     }
 
-    return new Image(
+    return new PNGPainter(
       this.imageData['IDAT'].data,
       this.imageData['IHDR'].width,
       this.imageData['IHDR'].height
@@ -179,7 +179,6 @@ class PNGParser extends ChunkParser {
 
     const decoder = DecoderFactory.getDecoder(imageType, width, height, 
                                               originData, external);
-
     this.imageData['IDAT'].data = decoder.decode();
   }
 }

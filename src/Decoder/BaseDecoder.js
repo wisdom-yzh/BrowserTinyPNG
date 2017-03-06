@@ -38,8 +38,7 @@ class BaseDecoder {
     let filterType = this.imageData.shift();
     for (index = 0; index < this.imageHeight; index++) {
       currentRow = this.imageData.splice(0, this.rowLength);
-      this.row = this.reconstruct(FILTER_TYPE[filterType])(currentRow, lastRow);
-      lastRow = this.row;
+      lastRow = this.row = this.reconstruct(FILTER_TYPE[filterType])(currentRow, lastRow);
       this.ptr = 0;
       while (this.ptr < this.rowLength) {
         decodeData.push(this.getPixel());
