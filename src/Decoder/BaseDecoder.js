@@ -1,4 +1,5 @@
 const { FILTER_TYPE, IMAGE_TYPE } = require('../Constants');
+const { reconstruct } = require('../Filter');
 
 class BaseDecoder {
 
@@ -17,14 +18,13 @@ class BaseDecoder {
       throw new Error('invalid imageData size');
     }
 
+    // 在派生类中定义bytePerPixel,表示一个pixel占多少bytes
+    // this.bytePerPixel = ?
     this.imageType = imageType;
     this.imageWidth = imageWidth;
     this.imageHeight = imageHeight;
     this.imageData = imageData;
     this.ptr = 0;
-
-    // 在派生类中定义rowLength,表示一个扫描行有多少个bytes
-    // this.rowLength = ?
   }
 
   /**
@@ -36,9 +36,14 @@ class BaseDecoder {
 
     let index = 0, currentRow, lastRow;
     let filterType = this.imageData.shift();
+
+    this.rowLength = this.bytePerPixel * this.imageWidth;
+
     for (index = 0; index < this.imageHeight; index++) {
+
       currentRow = this.imageData.splice(0, this.rowLength);
       lastRow = this.row = this.reconstruct(FILTER_TYPE[filterType])(currentRow, lastRow);
+
       this.ptr = 0;
       while (this.ptr < this.rowLength) {
         decodeData.push(this.getPixel());
@@ -49,11 +54,10 @@ class BaseDecoder {
   }
 
   /**
-   * @virtual
-   * reconstruct
+   * reconstruct, decode filter
    */
   reconstruct(filterType) {
-    return (currentRow, lastRow) => currentRow;
+    return reconstruct(this.bytePerPixel)[filterType];
   }
 
   /**
@@ -61,7 +65,7 @@ class BaseDecoder {
    * get pixel, virtual function
    */
   getPixel() {
-
+    this.ptr += this.bytePerPixel;
   }
 }
 

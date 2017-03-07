@@ -5,7 +5,7 @@ class GreyAlphaDecoder extends BaseDecoder {
 
   constructor(imageWidth, imageHeight, imageData) {
     super('GREYSCALE_WITH_ALPHA', imageWidth, imageHeight, imageData);
-    this.rowLength = 2 * this.imageWidth;
+    this.bytePerPixel = 2;
   }
 
   /**

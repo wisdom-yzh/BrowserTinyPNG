@@ -5,7 +5,7 @@ class GreyDecoder extends BaseDecoder {
 
   constructor(imageWidth, imageHeight, imageData) {
     super('GREYSCALE', imageWidth, imageHeight, imageData);
-    this.rowLength = this.imageWidth;
+    this.bytePerPixel = 1;
   }
 
   /**
@@ -14,7 +14,7 @@ class GreyDecoder extends BaseDecoder {
   getPixel() {
 
     const pixel = this.row[this.ptr];
-    this.ptr++;
+    super.getPixel();
     return new GreyPixel(pixel);
   }
 
