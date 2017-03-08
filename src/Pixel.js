@@ -21,6 +21,15 @@ class Pixel {
       throw new Error('index overflow!');
     }
   }
+
+  /**
+   * @virtual
+   */
+  distance(anotherPixel) {
+    if (!anotherPixel instanceof this.__proto__.constructor) {
+      throw new Error('Two pixel are different type');
+    }
+  }
 }
 
 Pixel.TYPE = {
@@ -54,6 +63,13 @@ class GreyPixel extends Pixel {
     canvasImageData.data[index+3] = 0;
   }
 
+  /**
+   * @override
+   */
+  distance(anotherPixel) {
+    super.distance(anotherPixel);
+    return Math.abs(this.greySample - anotherPixel.greySample);
+  }
 }
 
 /**
@@ -76,6 +92,17 @@ class GreyAlphaPixel extends Pixel {
     canvasImageData.data[index+1] = this.greySample;
     canvasImageData.data[index+2] = this.greySample;
     canvasImageData.data[index+3] = this.alphaSample;
+  }
+
+  /**
+   * @override
+   */
+  distance(anotherPixel) {
+    super.distance(anotherPixel);
+    return Math.sqrt(
+      Math.pow(this.greySample - anotherPixel.greySample, 2) +
+      Math.pow(this.alphaSample - anotherPixel.alphaSample, 2)
+    );
   }
 }
 
@@ -109,6 +136,19 @@ class IndexedPixel extends Pixel {
     canvasImageData.data[index+2] = this.bSample;
     canvasImageData.data[index+3] = this.alphaSample;
   }
+
+  /**
+   * @override
+   */
+  distance(anotherPixel) {
+    super.distance(anotherPixel);
+    return Math.sqrt(
+      Math.pow(this.rSample - anotherPixel.rSample, 2) +
+      Math.pow(this.gSample - anotherPixel.gSample, 2) +
+      Math.pow(this.bSample - anotherPixel.bSample, 2) +
+      Math.pow(this.alphaSample - anotherPixel.alphaSample, 2) 
+    );
+  }
 }
 
 /**
@@ -140,6 +180,17 @@ class RGBPixel extends Pixel {
     canvasImageData.data[index+3] = 255;
   }
 
+  /**
+   * @override
+   */
+  distance(anotherPixel) {
+    super.distance(anotherPixel);
+    return Math.sqrt(
+      Math.pow(this.rSample - anotherPixel.rSample, 2) +
+      Math.pow(this.gSample - anotherPixel.gSample, 2) +
+      Math.pow(this.bSample - anotherPixel.bSample, 2)
+    );
+  }
 }
 
 /**
@@ -178,6 +229,17 @@ class RGBAPixel extends Pixel {
     canvasImageData.data[index+3] = this.alphaSample;
   }
 
+  /**
+   * @override
+   */
+  distance(anotherPixel) {
+    super.distance(anotherPixel);
+    return Math.sqrt(
+      Math.pow(this.rSample - anotherPixel.rSample, 2) +
+      Math.pow(this.gSample - anotherPixel.gSample, 2) +
+      Math.pow(this.bSample - anotherPixel.bSample, 2)
+    );
+  }
 }
 
 module.exports = {
