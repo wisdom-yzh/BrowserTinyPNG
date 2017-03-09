@@ -14,6 +14,9 @@ const uInt8Arr2String = (uint8Array) => {
     .reduce((first, next) => first + next);
 }
 
+const rgb2int = (r, g, b) => (r << 16) + (g << 8) + b;
+
 module.exports = {
   uInt8Arr2String,
+  rgb2int
 }

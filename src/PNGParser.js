@@ -122,7 +122,7 @@ class PNGParser extends ChunkParser {
     if (!this.parsed) {
       this.parse();
     }
-
+	
     return new PNGPainter(
       this.imageData['IDAT'].data,
       this.imageData['IHDR'].width,

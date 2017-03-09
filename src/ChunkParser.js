@@ -113,9 +113,7 @@ class ChunkParser {
 
     let i = 0;
     while (i != arr.length) {
-      palette.push((arr[i] << 16) + 
-                   (arr[i + 1] << 8) + 
-                   (arr[i + 2]));
+      palette.push(arr.slice(i, i + 3));
       i += 3;
     }
     return { palette };
