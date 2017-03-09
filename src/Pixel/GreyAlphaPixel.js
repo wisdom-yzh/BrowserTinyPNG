@@ -25,12 +25,8 @@ class GreyAlphaPixel extends Pixel {
   /**
    * @override
    */
-  distance(anotherPixel) {
-    super.distance(anotherPixel);
-    return Math.sqrt(
-      Math.pow(this.greySample - anotherPixel.greySample, 2) +
-      Math.pow(this.alphaSample - anotherPixel.alphaSample, 2)
-    );
+  getColorArray() {
+    return [this.greySample, this.greySample, this.greySample, this.alphaSample];
   }
 }
 

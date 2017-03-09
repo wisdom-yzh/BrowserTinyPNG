@@ -23,18 +23,22 @@ class Pixel {
   }
 
   /**
-   * @virtual
+   * calculate distance
    */
   distance(anotherPixel) {
-    if (!anotherPixel instanceof this.__proto__.constructor) {
-      throw new Error('Two pixel are different type');
-    }
+    const [r1, g1, b1, a1] = this.getColorArray();
+    const [r2, g2, b2, a2] = anotherPixel.getColorArray();
+    return Math.sqrt(
+      Math.pow(r1 - r2, 2) + 
+      Math.pow(g1 - g2, 2) + 
+      Math.pow(b1 - b2, 2)
+    ) + (Math.abs(a1 - a2) >> 3);
   }
 
 	/**
 	 * @virtual 
 	 */
-	serialization() {
+	serialize() {
 
 		const serialized = 0;
 		const base = 1;
@@ -47,6 +51,10 @@ class Pixel {
 		return serialized;
 	}
 	
+  /**
+   * @virtual
+   */
+  getColorArray() {}
 }
 
 Pixel.TYPE = {

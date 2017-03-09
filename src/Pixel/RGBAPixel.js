@@ -39,13 +39,8 @@ class RGBAPixel extends Pixel {
   /**
    * @override
    */
-  distance(anotherPixel) {
-    super.distance(anotherPixel);
-    return Math.sqrt(
-      Math.pow(this.rSample - anotherPixel.rSample, 2) +
-      Math.pow(this.gSample - anotherPixel.gSample, 2) +
-      Math.pow(this.bSample - anotherPixel.bSample, 2)
-    );
+  getColorArray() {
+    return [this.rSample, this.gSample, this.bSample, this.alphaSample];
   }
 }
 
