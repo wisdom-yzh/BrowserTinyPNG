@@ -8,12 +8,15 @@ class IndexedPixel extends Pixel {
   constructor(index, palette, paletteAlpha) {
     super(Pixel.TYPE.INDEXED);
     const color = palette[index];
-    const hasAlpha = typeof paletteAlpha != 'undefined';
-    this.alphaSample = hasAlpha ? (paletteAlpha[index] || 255) : 255;
-    if (hasAlpha && index < paletteAlpha.length) {
-      this.alphaSample = paletteAlpha[index];
-    } else {
-      this.alphaSample = 255;
+    const hasAlpha = palette[0].length == 4 || typeof paletteAlpha != 'undefined';
+    if (hasAlpha) {
+      if (palette[0].length == 4) {
+        this.alphaSample = palette[index][3];
+      } else if (typeof paletteAlpha[index] != 'undefined') {
+        this.alphaSample = paletteAlpha[index];
+      } else {
+        this.alphaSample = 255;
+      }
     }
     this.rSample = palette[index][0];
     this.gSample = palette[index][1];

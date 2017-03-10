@@ -4,6 +4,7 @@ const ChunkParser = require('./ChunkParser');
 const ChunkIterator = require('./ChunkIterator');
 const Pixel = require('./Pixel');
 const PNGPainter = require('./PNGPainter');
+const PNGWriter = require('./PNGWriter');
 const DecoderFactory = require('./DecoderFactory');
 const { PNG_SIGNITURE } = require('./Constants');
 
@@ -124,6 +125,22 @@ class PNGReader extends ChunkParser {
     }
 	
     return new PNGPainter(
+      this.imageData['IDAT'].data,
+      this.imageData['IHDR'].width,
+      this.imageData['IHDR'].height
+    );
+  }
+
+  /**
+   * get an image object
+   */
+  getWriter() {
+
+    if (!this.parsed) {
+      this.parse();
+    }
+	
+    return new PNGWriter(
       this.imageData['IDAT'].data,
       this.imageData['IHDR'].width,
       this.imageData['IHDR'].height

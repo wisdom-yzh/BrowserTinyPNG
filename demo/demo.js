@@ -16,6 +16,9 @@
       const buffer = event.target.result;
       const reader = new PNGReader(buffer);
       reader.getPainter().draw(canvas);
+
+      const writer = reader.getWriter();
+      writer.cluster().getPainter().draw(canvas);
     };
 
     fileReader.readAsArrayBuffer(fileObj);

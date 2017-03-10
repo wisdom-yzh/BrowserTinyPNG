@@ -31,25 +31,28 @@ class Pixel {
     return Math.sqrt(
       Math.pow(r1 - r2, 2) + 
       Math.pow(g1 - g2, 2) + 
-      Math.pow(b1 - b2, 2)
-    ) + (Math.abs(a1 - a2) >> 3);
+      Math.pow(b1 - b2, 2) +
+      Math.pow(a1 - a2, 2)
+    );
   }
 
-	/**
-	 * @virtual 
-	 */
+  /**
+   * @virtual 
+   */
 	serialize() {
 
-		const serialized = 0;
-		const base = 1;
+    let serialized = 0;
+    let base = 1;
 
-		for (const value of this) {
-			serialized += base * value;
-			base <<= 8;
-		}
+    for (const value in this) {
+      if (typeof this[value] == 'number') {
+        serialized += base * this[value];
+        base <<= 8;
+      }
+    }
 
-		return serialized;
-	}
+    return serialized;
+  }
 	
   /**
    * @virtual

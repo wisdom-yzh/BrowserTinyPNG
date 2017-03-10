@@ -38,50 +38,53 @@ const hisgram = (pixels) => {
  * @param {Array(Pixel)} initial initial cluster pixels
  * @return {Array(Number), Array(Pixel)} 
  */
-const kmeans = (pixels, initialPixels) {
+const kmeans = (pixels, initialPixels) => {
 
-  const K = initialPixels.size();
+  const K = initialPixels.length;
 
-	// calculate points belong to which means pixels
-	let means = initialPixels, meansIndex = new Array(pixels.length).fill(0);
-	pixels.forEach((pixel, pIndex) => {
-		let minDistance = means[0].distance(pixel);
-		for (let i = 1; i < means.length; i++) {
-			let dist = means[i].distance(pixel);
-			if (dist < minDistance) {
-				minDistance = dist;
-				meansIndex[pIndex] = i;
-			}
-		}
-	});
+  // calculate points belong to which means pixels
+  let means = initialPixels, meansIndex = new Array(pixels.length).fill(0);
+  pixels.forEach((pixel, pIndex) => {
+    let minDistance = means[0].distance(pixel);
+    for (let i = 1; i < K; i++) {
+      let dist = means[i].distance(pixel);
+      if (dist < minDistance) {
+        minDistance = dist;
+        meansIndex[pIndex] = i;
+      }
+    }
+  });
 
-	// update new means
-	const newMeans = new Array(initialPixels.length).fill([0, 0, 0, 0]);
-	const newMeansCount = new Array(initialPixels.length).fill(0);
-	meansIndex.forEach((meanIndex, index) => {
-		const pixelArr = pixels[index].getColorArray();
-		for (let i = 0; i < pixelArr.length; i++) {
-			newMeans[meanIndex][i] += pixelArr[i];
-			newMeansCount[meanIndex]++;
-		}
-	});
-	
-	// create new means pixels
-	const newPixels = [];
-	for (let i = 0; i < newMeans.length; i++) {
-		newMeans[i] = newMeans[i].map(value => parseInt(value / newMeansCount[i]));
-		newPixels.push(new RGBAPixel(newMeans[i]));
-	}
+  // update new means
+  const newMeans = [];
+  const newMeansCount = new Array(K).fill(0);
+  meansIndex.forEach((meanIndex, index) => {
+    const pixelArr = pixels[index].getColorArray();
+    if (!newMeans[meanIndex]) {
+      newMeans[meanIndex] = new Array(pixelArr.length).fill(0);
+    }
+    for (let i = 0; i < pixelArr.length; i++) {
+      newMeans[meanIndex][i] += pixelArr[i];
+    }
+    newMeansCount[meanIndex]++;
+  });
 
-	// iterate or return
-	const EPS = 0.1;
-	let need_iterate = false;
-	for (let i = 0; i < newPixels.length; i++) {
-		if (newPixels[i].distance(initialPixels[i]) > EPS) {
-			return kmeans(pixels, newPixels);
-		}
-	}
-	return newPixels;
+  // create new means pixels
+  const newPixels = [];
+  for (let i = 0; i < K; i++) {
+    newMeans[i] = newMeans[i].map(value => parseInt(value / newMeansCount[i]));
+    newPixels.push(new RGBAPixel(newMeans[i]));
+  }
+
+  // iterate or return
+  const EPS = 0.1;
+  let need_iterate = false;
+  for (let i = 0; i < K; i++) {
+    if (newPixels[i].distance(initialPixels[i]) > EPS) {
+      return kmeans(pixels, newPixels);
+    }
+  }
+  return newPixels;
 }
 
 class Cluster {
@@ -102,6 +105,7 @@ class Cluster {
     if (size != this.size || !this.palettePixels || !this.indexes) {
       this.size = size; 
       this.getPalette(hisgram(this.pixels));
+      this.getIndexedPixels();
     }
 
     return {
@@ -137,6 +141,7 @@ class Cluster {
    */
   getIndexedPixels() {
     
+    this.indexes = [];
     for (const pixel of this.pixels) {
       const index = this.minDistance(pixel);
       this.indexes.push(index);
@@ -150,7 +155,7 @@ class Cluster {
   minDistance(pixel) {
 
     let minDist = pixel.distance(this.palettePixels[0]);
-    let minIndex = 1;
+    let minIndex = 0;
 
     for (let i = 1; i < this.size; i++) {
       const dist = pixel.distance(this.palettePixels[i]);
