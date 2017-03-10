@@ -89,17 +89,17 @@ const kmeans = (pixels, initialPixels) => {
 
 class Cluster {
 
-	/**
-	 * constructor
-	 */
-	constructor(pixels) {
+  /**
+   * constructor
+   */
+  constructor(pixels) {
     this.pixels = pixels;
-	}
+  }
 
-	/**
-	 * cluster
+  /**
+   * cluster
    * @param {Number} size color count
-	 */
+   */
   cluster(size) {
 
     if (size != this.size || !this.palettePixels || !this.indexes) {
@@ -119,7 +119,7 @@ class Cluster {
    * @param {Array} hisgram
    */
   getPalette(hisgram) {
-    
+
     const hisgramSize = hisgram.length;
 
     if (hisgramSize > this.size) {
@@ -140,7 +140,7 @@ class Cluster {
    * get indexed pixels
    */
   getIndexedPixels() {
-    
+
     this.indexes = [];
     for (const pixel of this.pixels) {
       const index = this.minDistance(pixel);
