@@ -1,1 +1,2 @@
-window.PNGParser = require('./src/PNGParser');
+window.PNGReader = require('./src/PNGReader');
+window.PNGWriter = require('./src/PNGWriter');

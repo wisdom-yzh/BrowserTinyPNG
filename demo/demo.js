@@ -14,8 +14,8 @@
 
     fileReader.onload = (event) => {
       const buffer = event.target.result;
-      const parser = new PNGParser(buffer);
-      parser.getPainter().draw(canvas);
+      const reader = new PNGReader(buffer);
+      reader.getPainter().draw(canvas);
     };
 
     fileReader.readAsArrayBuffer(fileObj);

@@ -1,4 +1,4 @@
-class PNGCreator {
+class PNGWriter {
 
   constructor(imageData) {
     this.imageData = imageData;
@@ -12,3 +12,5 @@ class PNGCreator {
 
   }
 }
+
+module.exports = PNGWriter;

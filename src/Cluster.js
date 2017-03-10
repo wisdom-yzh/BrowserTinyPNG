@@ -36,11 +36,52 @@ const hisgram = (pixels) => {
  * kmeans algorithm
  * @param {Array(Pixel)} pixels total pixels
  * @param {Array(Pixel)} initial initial cluster pixels
- * @param K
- * @return {Array(Pixel)} 
+ * @return {Array(Number), Array(Pixel)} 
  */
-const kmeans = (pixels, initial, K) {
-  
+const kmeans = (pixels, initialPixels) {
+
+  const K = initialPixels.size();
+
+	// calculate points belong to which means pixels
+	let means = initialPixels, meansIndex = new Array(pixels.length).fill(0);
+	pixels.forEach((pixel, pIndex) => {
+		let minDistance = means[0].distance(pixel);
+		for (let i = 1; i < means.length; i++) {
+			let dist = means[i].distance(pixel);
+			if (dist < minDistance) {
+				minDistance = dist;
+				meansIndex[pIndex] = i;
+			}
+		}
+	});
+
+	// update new means
+	const newMeans = new Array(initialPixels.length).fill([0, 0, 0, 0]);
+	const newMeansCount = new Array(initialPixels.length).fill(0);
+	meansIndex.forEach((meanIndex, index) => {
+		const pixelArr = pixels[index].getColorArray();
+		for (let i = 0; i < pixelArr.length; i++) {
+			newMeans[meanIndex][i] += pixelArr[i];
+			newMeansCount[meanIndex]++;
+		}
+	});
+	
+	// create new means pixels
+	const newPixels = [];
+	for (let i = 0; i < newMeans.length; i++) {
+		newMeans[i] = newMeans[i].map(value => parseInt(value / newMeansCount[i]));
+		newPixels.push(new RGBAPixel(newMeans[i]));
+	}
+
+	// iterate or return
+	const EPS = 0.1;
+	let need_iterate = false;
+	for (let i = 0; i < newPixels.length; i++) {
+		if (newPixels[i].distance(initialPixels[i]) > EPS) {
+			return kmeans(pixels, newPixels);
+		}
+	}
+	return newPixels;
 }
 
 class Cluster {
@@ -83,7 +124,7 @@ class Cluster {
       ).slice(0, this.size).map(
         row => row.pixel
       );
-      this.palettePixels = kmeans(this.pixels, initialPixels, this.size);
+      this.palettePixels = kmeans(this.pixels, initialPixels);
     } else {
       this.palettePixels = hisgram.map(row => row.pixel);
     }

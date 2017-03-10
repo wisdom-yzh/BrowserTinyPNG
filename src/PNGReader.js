@@ -24,16 +24,16 @@ const checkPNGSigniture = (buffer) => {
 }
 
 /**
- * @class PNGParser
+ * @class PNGReader
  * @see ChunkParser
  * @desc parse a png image 
  */
-class PNGParser extends ChunkParser {
+class PNGReader extends ChunkParser {
 
   /**
    * Init with png stream
    * @param {ArrayBuffer} buffer PNG File Stream
-   * @return {PNGParser}
+   * @return {PNGReader}
    */
   constructor(buffer) {
     super();
@@ -43,7 +43,7 @@ class PNGParser extends ChunkParser {
   /**
    * Set image buffer stream
    * @param {ArrayBuffer} buffer PNG File Stream
-   * @return {PNGParser}
+   * @return {PNGReader}
    */
   setBuffer(buffer) {
 
@@ -183,4 +183,4 @@ class PNGParser extends ChunkParser {
   }
 }
 
-module.exports = PNGParser;
+module.exports = PNGReader;
