@@ -15,7 +15,6 @@ class ChunkIterator {
   }
 
   next() {
-
     if (!this.buffer.byteLength) {
       return {
         done: true,

@@ -18,32 +18,22 @@ class Chunk {
    * @return void
    */
   constructor(buffer) {
-
     if (!buffer) {
       throw new Error('buffer为空');
     }
-
     const dataView = new DataView(buffer);
     const dataSize = dataView.getUint32(0);
     const chunkName = Chunk.getChunkName(buffer.slice(4, 8));
     const chunkData = buffer.slice(8, 8 + dataSize);
-    const crc = dataView.getUint32(8 + dataSize);
+    const crc = dataView.getInt32(8 + dataSize);
 
     this.chunkName = chunkName;
     this.chunkData = chunkData;
     this.crc = crc;
 
-    if (!this.checkCrc()) {
+    if (!Utils.checkCrc(this.crc, new Uint8Array(buffer.slice(4, 8 + dataSize)))) {
       throw new Error('crc32 fail! 数据损坏!');
     }
-  }
-
-  /**
-   * TODO: Check chunk data by crc32
-   * @return bool
-   */
-  checkCrc() {
-    return true;
   }
 
   /**
@@ -52,13 +42,11 @@ class Chunk {
    * @return {String}
    */
   static getChunkName(buffer) {
-
     const chunkNameBuffer = new Uint8Array(buffer);
     const chunkName = Utils.uInt8Arr2String(chunkNameBuffer);
     if (VALID_CHUNK_NAME.indexOf(chunkName) == -1) {
       throw new Error(`illegal ChunkName:${chunkName}`);
     }
-
     return chunkName;
   }
 }

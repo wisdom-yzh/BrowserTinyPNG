@@ -57,12 +57,12 @@ const kmeans = (pixels, initialPixels) => {
 
   // update new means
   const newMeans = [];
+  for (let i = 0; i < K; i++) {
+    newMeans.push([0, 0, 0, 0]);
+  }
   const newMeansCount = new Array(K).fill(0);
   meansIndex.forEach((meanIndex, index) => {
     const pixelArr = pixels[index].getColorArray();
-    if (!newMeans[meanIndex]) {
-      newMeans[meanIndex] = new Array(pixelArr.length).fill(0);
-    }
     for (let i = 0; i < pixelArr.length; i++) {
       newMeans[meanIndex][i] += pixelArr[i];
     }
