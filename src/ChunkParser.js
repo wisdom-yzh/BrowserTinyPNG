@@ -180,8 +180,8 @@ class ChunkParser {
         }
         const paletteAlpha = new Uint8Array(buffer);
         return { paletteAlpha };
-    default:
-        throw new Error(`tRNS not suitable for imageType:${imageType}`);
+      default:
+          throw new Error(`tRNS not suitable for imageType:${imageType}`);
     }
   }
 
@@ -314,12 +314,12 @@ class ChunkParser {
         if (len != 4) {
           throw new Error(`sBit length error [tRNS=${len},imageType=${imageType}`);
         }
-      return {
-        significantRedBits: dataArr[0],
-        significantGreenBits: dataArr[1],
-        significantBlueBits: dataArr[2],
-        significantAlphaBits: dataArr[3]
-      };
+        return {
+          significantRedBits: dataArr[0],
+          significantGreenBits: dataArr[1],
+          significantBlueBits: dataArr[2],
+          significantAlphaBits: dataArr[3]
+        };
       default:
         throw new Error(`sBit not suitable for imageType=${imageType}`);
     }

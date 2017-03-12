@@ -39,7 +39,7 @@ class Pixel {
   /**
    * @virtual 
    */
-	serialize() {
+  serialize() {
 
     let serialized = 0;
     let base = 1;
