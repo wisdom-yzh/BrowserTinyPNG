@@ -7,13 +7,27 @@ const CRC32 = require('crc-32');
  *  @return {String}
  */
 const uInt8Arr2String = (uint8Array) => {
-
   if (typeof TextDecoder != 'undefined') {
     return new window.TextDecoder('utf-8').decode(uint8Array);
   }
   return Array.from(uint8Array)
     .map((value) => String.fromCharCode(value))
     .reduce((first, next) => first + next);
+}
+
+/**
+ * uLong2Array
+ * @desc convert uint32 to array(4)
+ * @param {Number} uint32
+ * @return {Array}
+ */
+const uLong2Array = (uint32) => {
+  const uint8Array = [];
+  while (uint32 > 0) {
+    uint8Array.push(uint32 & 0xff);
+    uint32 >>= 8;
+  }
+  return uint8Array.reverse();
 }
 
 /**
@@ -47,7 +61,8 @@ const checkCrc = (crc, chunkData) => {
 
 module.exports = {
   uInt8Arr2String,
+  uLong2Array,
   rgb2int,
   generateCrc,
-  checkCrc
+  checkCrc,
 }
