@@ -42,7 +42,8 @@ const rgb2int = (r, g, b) => (r << 16) + (g << 8) + b;
  */
 const generateCrc = (chunkData) => {
   const crc32Value = CRC32.buf(chunkData);
-  const dataView = new DataView(new ArrayBuffer(4)).setInt32(crc32Value);
+  const dataView = new DataView(new ArrayBuffer(4));
+  dataView.setInt32(0, crc32Value);
   const crc32 = [];
   for (let i = 0; i < 4; i++) {
     crc32.push(dataView.getUint8(i));

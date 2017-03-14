@@ -116,7 +116,7 @@ class PNGWriter {
     data = Array.from(zlib.deflateSync(Buffer.from(data), {
       windowBits: 15
     }));
-    return makeChunk('IDAT'.split('').map(s => s.charCodeAt(0)));
+    return makeChunk('IDAT'.split('').map(s => s.charCodeAt(0)).concat(data));
   }
 
   /**

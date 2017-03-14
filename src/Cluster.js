@@ -29,7 +29,11 @@ const hisgram = (pixels) => {
     }
   }
 
-  return Object.values(hisgram);
+  const result = [];
+  for (const key in hisgram) {
+    result.push(hisgram[key]);
+  }
+  return result;
 }
 
 /**
@@ -75,9 +79,10 @@ const kmeans = (pixels, initialPixels) => {
     newMeans[i] = newMeans[i].map(value => parseInt(value / newMeansCount[i]));
     newPixels.push(new RGBAPixel(newMeans[i]));
   }
+  console.log('kmeans training...');
 
   // iterate or return
-  const EPS = 0.1;
+  const EPS = 1;
   let need_iterate = false;
   for (let i = 0; i < K; i++) {
     if (newPixels[i].distance(initialPixels[i]) > EPS) {
