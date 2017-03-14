@@ -55,8 +55,8 @@ class PNGWriter {
       .concat(this.IEND());
 
     let buffer = Buffer.from(data);
-    return new Blob(buffer, {
-      type: 'image/png'
+    return new Blob([buffer], {
+      type: 'application/octet-binary'
     });
   }
 
@@ -97,7 +97,7 @@ class PNGWriter {
   tRNS() {
     return makeChunk(
       'tRNS'.split('').map(s => s.charCodeAt(0))
-      .concat(this.palette.map(p => p[4]))
+      .concat(this.palette.map(p => p[3]))
     );
   }
   
@@ -107,7 +107,7 @@ class PNGWriter {
   IDAT() {
     let data = [];
     for (let i = 0; i < this.height; i++) {
-      const startIndex = i * this.height;
+      const startIndex = i * this.width;
       data = data.concat(
         // filter method is always 0
         [0].concat(this.indexes.slice(startIndex, startIndex + this.width))

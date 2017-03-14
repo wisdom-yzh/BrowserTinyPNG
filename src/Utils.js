@@ -22,12 +22,13 @@ const uInt8Arr2String = (uint8Array) => {
  * @return {Array}
  */
 const uLong2Array = (uint32) => {
-  const uint8Array = [];
-  while (uint32 > 0) {
-    uint8Array.push(uint32 & 0xff);
-    uint32 >>= 8;
+  const dataView = new DataView(new ArrayBuffer(4));
+  dataView.setUint32(0, uint32);
+  const ret = [];
+  for (let i = 0; i < 4; i++) {
+    ret.push(dataView.getUint8(i));
   }
-  return uint8Array.reverse();
+  return ret;
 }
 
 /**
@@ -40,25 +41,14 @@ const rgb2int = (r, g, b) => (r << 16) + (g << 8) + b;
  * @param {Uint8Array} chunkData
  * @return {Number}
  */
-const generateCrc = (chunkData) => {
-  const crc32Value = CRC32.buf(chunkData);
-  const dataView = new DataView(new ArrayBuffer(4));
-  dataView.setInt32(0, crc32Value);
-  const crc32 = [];
-  for (let i = 0; i < 4; i++) {
-    crc32.push(dataView.getUint8(i));
-  }
-  return crc32;
-}
+const generateCrc = (chunkData) => uLong2Array(CRC32.buf(chunkData));
 
 /**
  * check crc
  * @param {Number} crc
  * @param {Uint8Array} chunkData
  */
-const checkCrc = (crc, chunkData) => {
-  return CRC32.buf(chunkData) == crc;
-}
+const checkCrc = (crc, chunkData) => CRC32.buf(chunkData) == crc;
 
 module.exports = {
   uInt8Arr2String,
