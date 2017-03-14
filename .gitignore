@@ -2,6 +2,5 @@ node_modules
 .tern-project
 *.swp
 *.swo
-dist
 cscope.*
 tags
