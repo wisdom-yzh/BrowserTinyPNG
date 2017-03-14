@@ -14,9 +14,9 @@ class IndexedPixel extends Pixel {
         this.alphaSample = palette[index][3];
       } else if (typeof paletteAlpha[index] != 'undefined') {
         this.alphaSample = paletteAlpha[index];
-      } else {
-        this.alphaSample = 255;
       }
+    } else {
+      this.alphaSample = 255;
     }
     this.rSample = palette[index][0];
     this.gSample = palette[index][1];
