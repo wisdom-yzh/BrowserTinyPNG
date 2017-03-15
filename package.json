@@ -1,8 +1,8 @@
 {
-  "name": "png_parser",
+  "name": "browser_tinypng",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "a simple program just like tinypng that can be run in browser",
+  "main": "dist/index.js",
   "scripts": {
     "make": "./node_modules/.bin/webpack -p"
   },

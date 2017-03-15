@@ -12,7 +12,13 @@
 
 ## 使用方式(参考demo)
 
-- 编译打包(已包含打包后的代码)
+- 下载package
+
+```bash
+npm install browser_tinypng@1.0.0
+```
+
+- 编译打包(非必需,已包含打包后的代码)
 
 ```bash
 npm install && npm run make
